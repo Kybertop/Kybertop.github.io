@@ -17,7 +17,6 @@
   font-size: 50px;
   color: white;
   font-family: sans-serif;
-  text-transform: lowercase;
   color: white;
 }
 
@@ -42,7 +41,7 @@
 .cd-headline b.is-visible {
   opacity: 1;
   font-family: sans-serif;
-  text-transform: lowercase;
+  font-width: 500;
   color: white;
 }
 
