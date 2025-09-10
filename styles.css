@@ -209,12 +209,12 @@ label, .field{color:var(--text)}
   .tab{white-space:nowrap}
   .logo{width:24px;height:24px}
   .title{font-size:18px}
-  .btn.small{padding:8px 10px}
+  .btn.small{padding:5px 10px}
 }
 /* Even narrower phones */
 @media (max-width: 420px){
   .title{font-size:16px}
-  .btn.small{padding:8px 10px;font-size:14px}
+  .btn.small{padding:8px 8px;font-size:12px}
 }
 
 
@@ -247,7 +247,7 @@ label, .field{color:var(--text)}
     overflow-y:hidden;
     padding:4px 2px 8px;
   }
-  .tab{flex:0 0 auto; line-height:1; padding:10px 14px;}
+  .tab{flex:0 0 auto; line-height:1; padding:10px 15px;font-size:12px}
   /* keep action button vertically centered */
   .actions{align-self:center}
 }
