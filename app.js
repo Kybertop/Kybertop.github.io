@@ -1,11 +1,7 @@
 // ===== Demo dáta (uprav podľa potreby) =====
 // dept: 'MPS' => C triedy, dept: 'TITT' => G triedy
 const NOTES_DATA = [
-  { title: 'BOZP – základné zásady', dept: 'MPS', class: '1.C', file: 'notes/BOZP_zaklady_1C.pdf', size: '420 kB', tags: ['bozp','bezpečnosť'] },
-  { title: 'Meranie a orysovanie – ťahák', dept: 'MPS', class: '2.C', file: 'notes/meranie_orysovanie_2C.pdf', size: '1.2 MB', tags: ['MPS','kov','orys'] },
-  { title: 'Elektromery – prehľad', dept: 'MPS', class: '3.C', file: 'notes/elektromery_3C.pdf', size: '980 kB', tags: ['elektro','meranie'] },
-  { title: 'TITT: základy sietí', dept: 'TITT', class: '2.G', file: 'notes/titt_siete_2G.pdf', size: '760 kB', tags: ['TITT','IT','siete'] },
-  { title: 'Python: dátové typy', dept: 'TITT', class: '2.G', file: 'https://example.com/python_datatypes.pdf', size: '600 kB', tags: ['programovanie','python'] },
+  { title: 'Rysovanie', dept: 'MPS', class: '1.C', file: 'https://cdn.discordapp.com/attachments/1415296683822026964/1415296697592053820/PlosneMeranieOrysovanie.docx?ex=68c2b143&is=68c15fc3&hm=465d52757442c2098e2c42d2c719ef609765454b6b86eb581c3a796c0f543259&', size: '420 kB', tags: ['rysovanie'] },
 ];
 
 // ===== Router (hash) & nav – vždy zobrazi len aktuálnu sekciu =====
@@ -111,6 +107,44 @@ document.querySelectorAll('.chip[data-jump]').forEach(el=>{
 const dialog = document.getElementById('uploadDialog');
 document.getElementById('btnUpload').addEventListener('click', ()=> dialog.showModal());
 document.getElementById('cancelUpload').addEventListener('click', ()=> dialog.close());
+
+// === Success modal (nice confirmation instead of alert) ===
+function ensureSuccessModal(){
+  if (document.getElementById('sentDialog')) return;
+  const style = document.createElement('style');
+  style.textContent = `
+    dialog#sentDialog{border:none;border-radius:16px;padding:0;background:transparent}
+    dialog#sentDialog::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(2px)}
+    .sent-card{background:linear-gradient(180deg,#111113,#0f0f11);border:1px solid var(--border, #1e1f22);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:420px;display:flex;gap:12px;align-items:flex-start}
+    .sent-icon{width:22px;height:22px;color:var(--accent, #e11d2e);flex:0 0 auto;margin-top:2px}
+    .sent-title{margin:0 0 6px;font-weight:800}
+    .sent-text{margin:0;color:var(--muted,#b6b6bb)}
+    .sent-actions{display:flex;justify-content:flex-end;margin-top:12px}
+    .sent-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--accent,#e11d2e);background:linear-gradient(180deg,var(--accent,#e11d2e), var(--accent-700,#960b17));color:#fff;font-weight:800;cursor:pointer}
+  `;
+  document.head.appendChild(style);
+  const d = document.createElement('dialog');
+  d.id = 'sentDialog';
+  d.innerHTML = `
+    <div class="sent-card">
+      <svg class="sent-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20Zm-1 13.17l-3.59-3.58L9 10l2 2 4-4 1.41 1.42L11 15.17z"/></svg>
+      <div style="flex:1">
+        <h3 class="sent-title">Správa odoslaná</h3>
+        <p class="sent-text">Tvoja práca bola úspešne odoslaná.</p>
+        <div class="sent-actions"><button type="button" class="sent-btn" id="sentCloseBtn">OK</button></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(d);
+  d.querySelector('#sentCloseBtn').addEventListener('click', ()=> d.close());
+}
+function showSuccessModal(){
+  ensureSuccessModal();
+  const d = document.getElementById('sentDialog');
+  if (!d.open) d.showModal();
+  // auto-close po 2.2s (ak si to užívateľ nezavrie sám)
+  setTimeout(()=>{ if(d.open) d.close(); }, 2200);
+}
 
 // Mapovanie tried -> webhook URL (doplň svoje reálne URL z Discordu)
 const WEBHOOKS = {
