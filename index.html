@@ -8,6 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='black'/%3E%3Cpath d='M12 40h12l4-16 8 24 6-16h10' stroke='white' stroke-width='4' fill='none'/%3E%3Cpath d='M8 20h16' stroke='%23ff1a1a' stroke-width='4'/%3E%3C/svg%3E" />
   <link rel="preload" href="styles.css" as="style">
   <link rel="stylesheet" href="styles.css">
+  <script src="mc.js"></script>
 </head>
 <body>
   <header>
@@ -24,7 +25,8 @@
         <a class="tab" href="#home" data-route>Domov</a>
         <a class="tab" href="#notes" data-route>Poznámky</a>
         <a class="tab" href="#contact" data-route>Kontakt</a>
-      </nav>
+        <a class="tab" href="#minecraft" data-route>Minecraft</a>
+    </nav>
       <div class="actions">
         <button id="btnUpload" class="btn small" type="button">Poslať prácu</button>
       </div>
@@ -120,7 +122,43 @@
         </div>
       </div>
     </section>
-  </main>
+  
+    <!-- ===== MINECRAFT ===== -->
+    <section id="minecraft" data-page class="hide">
+      <div class="section-title">
+        <h2>Minecraft</h2>
+        <div class="toolbar">
+          <button class="btn small" id="mcRefresh" type="button">Obnoviť</button>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="card">
+          <h3 style="margin-top:0">Info o serveri</h3>
+          <div class="list">
+            <div class="list-row">
+              <span>IP adresa</span>
+              <div style="display:flex;align-items:center;gap:10px">
+                <code class="kbd" id="mcIpText">energo.ddns.net</code>
+                <button class="btn small" id="mcCopy" type="button">Kopírovať</button>
+              </div>
+            </div>
+            <a href="http://energo.ddns.net:7777" target="_blank" rel="noopener noreferrer">
+              <span>Live mapa</span>
+              <span class="kbd">energo.ddns.net:7777</span>
+            </a>
+          </div>
+          <div style="margin-top:14px" id="mcStatusWrap">
+            <div class="muted" id="mcStatusText">Načítavam stav servera…</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h3 style="margin:0">Online hráči</h3></div>
+          <div id="mcPlayers" class="mc-players-grid"></div>
+          <div id="mcPlayersEmpty" class="muted">Nikto nie je online.</div>
+        </div>
+      </div>
+    </section>
+    </main>
 
   <footer>
     <div class="container foot">
