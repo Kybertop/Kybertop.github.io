@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Energo</title>
+  <meta name="description" content="Rýchla a prehľadná stránka na zdieľanie poznámok pre odbory MPS a TITT, rozdelené podľa tried." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='black'/%3E%3Cpath d='M12 40h12l4-16 8 24 6-16h10' stroke='white' stroke-width='4' fill='none'/%3E%3Cpath d='M8 20h16' stroke='%23ff1a1a' stroke-width='4'/%3E%3C/svg%3E" />
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 15h6l3-10 4 15 3-9h2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="title">Energo</span>
+      </div>
+      <nav class="tabs" role="navigation" aria-label="Hlavná navigácia">
+        <a class="tab" href="#home" data-route>Domov</a>
+        <a class="tab" href="#notes" data-route>Poznámky</a>
+        <a class="tab" href="#contact" data-route>Kontakt</a>
+      </nav>
+      <div class="actions">
+        <button id="btnUpload" class="btn small" type="button">Poslať prácu</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ===== HOME ===== -->
+    <section id="home" data-page>
+      <div class="hero">
+        <div class="hero-wrap">
+          <div class="hero-card">
+            <h1>Všetky poznámky na jednom mieste.</h1>
+            <p>Rozdelené pre odbory <strong>MPS</strong> (C triedy) a <strong>TITT</strong> (G triedy). Rýchlo nájdeš, čo potrebuješ – bez zdržovania, v modernom a prehľadnom dizajne.</p>
+            <div class="quick" aria-label="Rýchly výber">
+              <button class="chip" data-jump='{"dept":"MPS","class":"1.C"}'>MPS • 1.C</button>
+              <button class="chip" data-jump='{"dept":"MPS","class":"2.C"}'>MPS • 2.C</button>
+              <button class="chip" data-jump='{"dept":"MPS","class":"3.C"}'>MPS • 3.C</button>
+              <button class="chip" data-jump='{"dept":"TITT","class":"2.G"}'>TITT • 2.G</button>
+              <a class="chip ghost" href="#notes">Všetky poznámky</a>
+            </div>
+          </div>
+          <div class="hero-card hero-cta">
+            <h2 style="margin:0 0 8px">Potrebujete odovzdať prácu?</h2>
+            <p class="muted">Klikni na <strong>Poslať prácu</strong> hore vpravo. Príloha sa odošle do nášho Discordu do miestnosti podľa triedy.</p>
+            <ul class="bullets">
+              <li>Vyber triedu (1.C • 2.C • 3.C • 2.G)</li>
+              <li>Napíš <em>Meno + Priezvisko</em></li>
+              <li>Prilož súbor a odošli</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== NOTES ===== -->
+    <section id="notes" data-page class="hide">
+      <div class="section-title">
+        <h2>Poznámky</h2>
+        <div class="toolbar" role="group" aria-label="Filtre">
+          <!-- Toggle tlačidlá pre MPS/TITT -->
+          <div class="toggles" role="group" aria-label="Odbor prepínač">
+            <button class="toggle" data-dept="" aria-pressed="true">Všetko</button>
+            <button class="toggle" data-dept="MPS">MPS</button>
+            <button class="toggle" data-dept="TITT">TITT</button>
+          </div>
+          <!-- Dropdowny ostávajú pre jasnosť -->
+          <select id="dept" class="select" aria-label="Odbor">
+            <option value="">Odbor: všetko</option>
+            <option value="MPS">MPS (C triedy)</option>
+            <option value="TITT">TITT (G triedy)</option>
+          </select>
+          <select id="klass" class="select" aria-label="Trieda">
+            <option value="">Trieda: všetko</option>
+            <option value="1.C">1.C</option>
+            <option value="2.C">2.C</option>
+            <option value="3.C">3.C</option>
+            <option value="2.G">2.G</option>
+          </select>
+          <input id="query" class="input" type="search" placeholder="Hľadať podľa názvu alebo tagu…" aria-label="Hľadať" />
+          <button id="clear" class="btn ghost" type="button">Vyčistiť</button>
+        </div>
+      </div>
+
+      <div id="notesWrap" class="notes-grid" aria-live="polite"></div>
+      <div id="emptyState" class="empty hide">Žiadne výsledky. Skús upraviť filtre alebo hľadanie.</div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" data-page class="hide">
+      <div class="columns">
+        <div class="card">
+          <div class="section-title"><h2>Kontakt</h2></div>
+          <div class="list">
+            <a href="https://discord.gg/mtnjZ6vqsE" target="_blank" rel="noopener noreferrer">
+              <span>Discord</span>
+              <span class="kbd">discord.gg/mtnjZ6vqsE</span>
+            </a>
+            <a href="mailto:mov.heskopatrik@gmail.com">
+              <span>E‑mail</span>
+              <span class="kbd">mov.heskopatrik@gmail.com</span>
+            </a>
+            <div class="list-row">
+              <span>EduPage</span>
+              <span class="kbd">Patrik Hesko</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" aria-label="Discord widget">
+          <div class="section-title"><h2>Discord – pridaj sa</h2></div>
+          <iframe src="https://discord.com/widget?id=1251854428827422790&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts" style="width:100%; height:440px; border-radius:12px"></iframe>
+          <noscript><p>Na zobrazenie Discord widgetu povoľ JavaScript.</p></noscript>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div class="sig"><svg class="bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg> Energo je cesta</div>
+      <div class="copy">© <span id="year"></span> Energo</div>
+    </div>
+  </footer>
+
+  <!-- ===== Upload modal (dialog) ===== -->
+  <dialog id="uploadDialog">
+    <form id="uploadForm" method="post" enctype="multipart/form-data" target="uploadTarget">
+      <h3>Poslať prácu na Discord</h3>
+      <p class="muted">Súbor bude odoslaný do miestnosti podľa triedy.</p>
+
+      <label class="field">Trieda
+        <select name="class" id="uClass" required>
+          <option value="" disabled selected>Vyber triedu…</option>
+          <option value="1.C">1.C (MPS)</option>
+          <option value="2.C">2.C (MPS)</option>
+          <option value="3.C">3.C (MPS)</option>
+          <option value="2.G">2.G (TITT)</option>
+        </select>
+      </label>
+
+      <div class="grid2">
+        <label class="field">Meno
+          <input type="text" id="uName" placeholder="Ján" required>
+        </label>
+        <label class="field">Priezvisko
+          <input type="text" id="uSurname" placeholder="Novák" required>
+        </label>
+      </div>
+
+      <label class="field">Poznámka (voliteľné)
+        <input type="text" id="uNote" placeholder="Napr. úloha č. 3">
+      </label>
+
+      <label class="field">Súbor
+        <input type="file" name="files[0]" id="uFile" required>
+      </label>
+
+      <!-- payload_json sa doplní skriptom pred odoslaním -->
+      <input type="hidden" name="payload_json" id="payload" />
+
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" id="cancelUpload">Zrušiť</button>
+        <button type="submit" class="btn" id="sendUpload">Odoslať</button>
+      </div>
+      <p id="uploadHint" class="muted tiny">Ak sa po odoslaní nič nezobrazí, je to OK – odosielanie prebieha na pozadí.</p>
+    </form>
+    <iframe name="uploadTarget" id="uploadTarget" class="hidden"></iframe>
+  </dialog>
+
+  <script defer src="app.js"></script>
+</body>
+</html>
