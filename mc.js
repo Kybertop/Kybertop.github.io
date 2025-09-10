@@ -114,8 +114,8 @@
           let uuid = p.uuid || null;
           // initial avatar by name
           let avatar = uuid
-            ? `https://crafatar.com/avatars/${uuid}?size=40&overlay`
-            : `https://mc-heads.net/avatar/${encodeURIComponent(name)}/40`;
+            ? `https://mc-heads.net/avatar/${encodeURIComponent(name)}/40`
+            : `https://crafatar.com/avatars/${uuid}?size=40&overlay`;
           const item = document.createElement('div');
           item.className = 'mc-player';
           const imgId = `a_${Math.random().toString(36).slice(2)}`;
