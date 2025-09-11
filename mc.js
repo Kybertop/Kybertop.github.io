@@ -3,6 +3,9 @@
 (function(){
   const HOST = 'energo.ddns.net';
   const DAY  = new Date().toISOString().slice(0,10);
+  const REFRESH_MS = 30_000;            // auto-refresh interval (ms)
+  let refreshTimer = null;
+
   const $  = (s, r=document) => r.querySelector(s);
 
   async function json(url){
@@ -79,10 +82,20 @@
     }catch(e){ st.textContent='Nepodarilo sa načítať dáta o serveri.'; empty.classList.remove('hide'); }
   }
 
-  function start(){ ensureModsCard(); render(); }
-  function nav(){ const h=(location.hash||'#home'); if(h==='#minecraft') start(); }
+  // --- auto-refresh iba na karte #minecraft ---
+  const onMinecraft = () => (location.hash || '#home') === '#minecraft';
+  function startAuto(){ stopAuto(); refreshTimer = setInterval(() => { if (onMinecraft()) render(); }, REFRESH_MS); }
+  function stopAuto(){ if (refreshTimer){ clearInterval(refreshTimer); refreshTimer = null; } }
+
+  function start(){ ensureModsCard(); render(); startAuto(); }
+  function nav(){
+    if (onMinecraft()) start();
+    else stopAuto();
+  }
+
   document.addEventListener('DOMContentLoaded', nav);
   window.addEventListener('hashchange', nav);
+
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('mcRefresh')?.addEventListener('click', render);
     document.getElementById('mcCopy')?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText('energo.ddns.net'); }catch(_){}});
