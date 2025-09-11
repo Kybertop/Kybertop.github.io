@@ -7,6 +7,7 @@
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;background:linear-gradient(180deg,#0a0a0a 0%,#0e0e10 100%);color:var(--text);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .container{max-width:1100px;margin:0 auto;padding:0 18px}
+a{color:inherit}
 
 /* Header */
 header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.1) blur(8px);background:rgba(12,12,13,.7);border-bottom:1px solid var(--border)}
@@ -16,13 +17,26 @@ header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.1) blur(8px);
 .logo svg{width:18px;height:18px}
 .title{font-weight:800;letter-spacing:.2px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tab{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:linear-gradient(180deg,#141416,#101013);box-shadow:var(--shadow);font-weight:600;opacity:.95;text-decoration:none;color:inherit}
+.tab{padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:linear-gradient(180deg,#141416,#101013);box-shadow:var(--shadow);font-weight:600;opacity:.95;text-decoration:none;color:inherit;white-space:nowrap}
 .tab[aria-current="page"],.tab:hover{border-color:var(--accent);box-shadow:0 0 0 2px rgba(225,29,46,.18)}
 .actions{margin-left:auto}
 .btn{display:inline-flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--accent);background:linear-gradient(180deg,var(--accent),var(--accent-700));font-weight:800;letter-spacing:.2px;color:white;cursor:pointer}
 .btn.small{padding:8px 12px}
 .btn.ghost{border-color:#2b2b2f;background:linear-gradient(180deg,#131315,#101013);color:var(--text);font-weight:700}
 .btn.ghost:hover{border-color:var(--accent)}
+
+/* Hamburger */
+.menu-toggle{display:none;align-items:center;justify-content:center;border:1px solid var(--border);background:linear-gradient(180deg,#131315,#101013);color:var(--text);border-radius:10px;padding:8px;cursor:pointer;margin-left:8px}
+@media(max-width:860px){
+  .menu-toggle{display:inline-flex}
+  header .tabs{display:none}
+  .mobile-panel{position:absolute;left:0;right:0;top:64px;background:rgba(12,12,13,.95);backdrop-filter:saturate(1.1) blur(8px);border-bottom:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .mobile-list{display:grid;gap:10px;padding:12px 18px 16px}
+  .mobile-list .tab{display:block;text-align:left}
+  .mobile-panel[hidden]{display:none!important}
+  header.nav-open .mobile-panel[hidden]{display:block!important}
+  .actions{display:block !important;}
+}
 
 /* Hero */
 .hero{padding:56px 0 24px}
@@ -51,7 +65,8 @@ section{padding:26px 0 56px}
 .toggle{padding:10px 12px;border-radius:10px;border:1px solid #2b2b2f;background:linear-gradient(180deg,#131315,#101013);color:var(--text);font-weight:700;cursor:pointer}
 .toggle[aria-pressed="true"],.toggle:hover{border-color:var(--accent)}
 
-/* Notes grid */
+/* Notes */
+#notesWrap{display:block}
 .notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
 @media (max-width:1000px){.notes-grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:640px){.notes-grid{grid-template-columns:1fr}}
@@ -75,7 +90,7 @@ footer .sig{display:flex;align-items:center;gap:10px;font-weight:800}
 .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .copy{color:var(--muted);font-size:13px}
 
-/* Upload dialog */
+/* Upload dialog (základ) */
 #uploadDialog{border:none;border-radius:16px;width:min(640px,94vw);padding:0;background:transparent}
 #uploadDialog::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(2px)}
 #uploadForm{background:linear-gradient(180deg,#111113,#0f0f11);border:1px solid var(--border);border-radius:16px;padding:18px}
@@ -90,10 +105,9 @@ footer .sig{display:flex;align-items:center;gap:10px;font-weight:800}
 .tiny{font-size:12px}
 .hide{display:none!important}
 
-/* Readable dark controls + placeholder + autofill */
+/* Readable dark controls */
 .field input, .field select, .input, .select {color:var(--text); caret-color:var(--text); color-scheme:dark;}
-.field input::placeholder, .input::placeholder {color:var(--muted); opacity:.9;}
-.field input:-webkit-autofill{ -webkit-text-fill-color:var(--text); transition: background-color 9999s ease-in-out 0s; box-shadow:0 0 0px 1000px #121215 inset !important; caret-color:var(--text);}
+.field input::placeholder, .input::placeholder {color:var(--muted); opacity:.95;}
 select, .select { background-color:#121215; color:var(--text); }
 select option { background-color:#121215; color:var(--text); }
 
@@ -107,28 +121,68 @@ input[type="file"]::file-selector-button {
 input[type="file"]::-webkit-file-upload-button:hover,
 input[type="file"]::file-selector-button:hover { filter:brightness(1.05) }
 
-/* Headings always light */
+/* Headings */
 h1,h2,h3,h4,h5,h6{color:var(--text)}
 
-/* Labels light */
-label, .field{color:var(--text)}
-.field *:not(input):not(select):not(textarea):not(button){color:inherit}
-
-/* Grouping by class (sections) */
+/* Grouping by class */
 .group{margin-top:22px}
 .group-title{font-size:18px;font-weight:800;margin:10px 0 8px;padding:6px 10px;border:1px solid var(--border);border-radius:10px;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(180deg,#131315,#101013)}
 .group-title .count{font-weight:700;color:var(--muted);margin-left:6px;font-size:14px}
 .group-sep{height:1px;margin:18px 0;background:linear-gradient(90deg,transparent,#2b2c31 20%,#2b2c31 80%,transparent)}
 
-/* Layout fix: parent wrapper should not be a grid */
-#notesWrap{ display:block !important; }
-#notesWrap .group{ margin-bottom:22px; }
-#notesWrap .group:last-child{ margin-bottom:0; }
-
-/* ===== Minecraft styles ===== */
-.mc-players-grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px}
-@media (max-width:900px){.mc-players-grid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:640px){.mc-players-grid{grid-template-columns:repeat(2,1fr)}}
+/* Minecraft players grid */
+.mc-players-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+  gap:12px;
+}
+@media (max-width:900px){.mc-players-grid{grid-template-columns:repeat(auto-fill, minmax(150px, 1fr))}}
+@media (max-width:640px){.mc-players-grid{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr))}}
 .mc-player{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#131315,#101013);padding:8px 10px}
 .mc-player img{width:32px;height:32px;border-radius:6px;image-rendering:pixelated;box-shadow:inset 0 0 0 1px #000}
 .mc-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px dashed #2b2b2f;background:#121215;font-size:13px}
+
+/* Recommended Mods (ak používaš mc.js, zostáva) */
+.mods-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:12px}
+.mod{display:block;padding:14px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(180deg,#131315,#101013);text-decoration:none;color:inherit}
+.mod:hover{border-color:var(--accent)}
+.mod-title{font-weight:800;margin-bottom:6px}
+.mod-desc{color:var(--muted);font-size:14px}
+
+/* Toolbar mobile stack (lepší layout) */
+@media (max-width: 680px){
+  .toolbar{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; }
+  .toolbar .toggles{ grid-column: 1 / -1; }
+  .toolbar .select{ width:100%; }
+  .toolbar .input{ grid-column: 1 / -1; width:100%; }
+  .toolbar .btn{ grid-column: 1 / -1; width:100%; justify-content:center; }
+  #notesWrap .group{ margin-top:14px; }
+}
+
+/* === FIX: žiadny biely okraj dialógov === */
+#sentDialog,
+#uploadDialog{
+  border:none;
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+}
+#sentDialog::backdrop,
+#uploadDialog::backdrop{
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(2px);
+}
+#sentDialog > *{ border-radius:16px; }
+
+/* === FIX: čitateľné texty v upload formulári === */
+#uploadForm, #uploadForm *{ color:var(--text); }
+#uploadForm input, #uploadForm select, #uploadForm textarea{
+  color:var(--text);
+  background:#121215;
+  border:1px solid var(--border);
+}
+#uploadForm input::placeholder{ color:var(--muted); opacity:.95; }
+#uploadForm input:-webkit-autofill{
+  -webkit-text-fill-color:var(--text);
+  box-shadow:0 0 0px 1000px #121215 inset !important;
+}

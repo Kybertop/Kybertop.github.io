@@ -8,7 +8,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='black'/%3E%3Cpath d='M12 40h12l4-16 8 24 6-16h10' stroke='white' stroke-width='4' fill='none'/%3E%3Cpath d='M8 20h16' stroke='%23ff1a1a' stroke-width='4'/%3E%3C/svg%3E" />
   <link rel="preload" href="styles.css" as="style">
   <link rel="stylesheet" href="styles.css">
-  <script src="mc.js"></script>
+  <script defer src="app.js"></script>
+  <script defer src="mc.js"></script>
 </head>
 <body>
   <header>
@@ -21,14 +22,36 @@
         </div>
         <span class="title">Energo</span>
       </div>
+
+      <!-- Desktop tabs -->
       <nav class="tabs" role="navigation" aria-label="Hlavná navigácia">
         <a class="tab" href="#home" data-route>Domov</a>
         <a class="tab" href="#notes" data-route>Poznámky</a>
         <a class="tab" href="#contact" data-route>Kontakt</a>
         <a class="tab" href="#minecraft" data-route>Minecraft</a>
-    </nav>
+      </nav>
+
+      <!-- Upload always visible -->
       <div class="actions">
         <button id="btnUpload" class="btn small" type="button">Poslať prácu</button>
+      </div>
+
+      <!-- Hamburger (mobile) -->
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobilePanel">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile panel -->
+    <div class="mobile-panel" id="mobilePanel" hidden>
+      <div class="mobile-list container">
+        <a class="tab" href="#home" data-route>Domov</a>
+        <a class="tab" href="#notes" data-route>Poznámky</a>
+        <a class="tab" href="#contact" data-route>Kontakt</a>
+        <a class="tab" href="#minecraft" data-route>Minecraft</a>
+        <!-- Upload button úmyselne nie je v menu -->
       </div>
     </div>
   </header>
@@ -67,13 +90,11 @@
       <div class="section-title">
         <h2>Poznámky</h2>
         <div class="toolbar" role="group" aria-label="Filtre">
-          <!-- Toggle tlačidlá pre MPS/TITT -->
           <div class="toggles" role="group" aria-label="Odbor prepínač">
             <button class="toggle" data-dept="" aria-pressed="true">Všetko</button>
             <button class="toggle" data-dept="MPS">MPS</button>
             <button class="toggle" data-dept="TITT">TITT</button>
           </div>
-          <!-- Dropdowny ostávajú pre jasnosť -->
           <select id="dept" class="select" aria-label="Odbor">
             <option value="">Odbor: všetko</option>
             <option value="MPS">MPS (C triedy)</option>
@@ -91,7 +112,7 @@
         </div>
       </div>
 
-      <div id="notesWrap" class="notes-grid" aria-live="polite"></div>
+      <div id="notesWrap"></div>
       <div id="emptyState" class="empty hide">Žiadne výsledky. Skús upraviť filtre alebo hľadanie.</div>
     </section>
 
@@ -156,6 +177,7 @@
           <div id="mcPlayers" class="mc-players-grid"></div>
           <div id="mcPlayersEmpty" class="muted">Nikto nie je online.</div>
         </div>
+        <!-- Recommended mods card sa doplní dynamicky z mc.js -->
       </div>
     </section>
     </main>
@@ -200,7 +222,6 @@
         <input type="file" name="files[0]" id="uFile" required>
       </label>
 
-      <!-- payload_json sa doplní skriptom pred odoslaním -->
       <input type="hidden" name="payload_json" id="payload" />
 
       <div class="dialog-actions">
@@ -211,7 +232,5 @@
     </form>
     <iframe name="uploadTarget" id="uploadTarget" class="hidden"></iframe>
   </dialog>
-
-  <script defer src="app.js"></script>
 </body>
 </html>
