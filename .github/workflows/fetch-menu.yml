@@ -37,7 +37,7 @@ PKG
       - name: Run fetcher
         env:
           SOURCE_URL: ${{ secrets.SOURCE_URL }}   # nastavíš o chvíľu
-          SELECTOR: 'div.vc_single_image-wrapper img'
+          SELECTOR: '#jedalnylistok .vc_single_image-wrapper img, #jedalnylistok img'
           OUTPUT_PATH: 'assets/menu.jpg'
         run: node scripts/fetch_menu.js
 
