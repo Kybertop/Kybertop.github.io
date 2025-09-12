@@ -1,0 +1,54 @@
+name: Update menu image
+
+on:
+  schedule:
+    - cron: '15 4 * * *'  # denne ~06:15 CET/CEST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: |
+          if [ ! -f package.json ]; then
+            cat > package.json <<'PKG'
+{
+  "name": "menu-fetcher",
+  "private": true,
+  "type": "module",
+  "dependencies": { "cheerio": "^1.0.0" }
+}
+PKG
+          fi
+          npm i cheerio@^1
+
+      - name: Run fetcher
+        env:
+          SOURCE_URL: ${{ secrets.SOURCE_URL }}   # nastavíš o chvíľu
+          SELECTOR: 'div.vc_single_image-wrapper img'
+          OUTPUT_PATH: 'assets/menu.jpg'
+        run: node scripts/fetch_menu.js
+
+      - name: Commit & push if changed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "menu-bot"
+            git config user.email "menu-bot@users.noreply.github.com"
+            git add -A
+            git commit -m "chore(menu): update image [skip ci]"
+            git push
+          else
+            echo "No changes."
+          fi
