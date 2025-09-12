@@ -2,7 +2,7 @@ name: Update menu image
 
 on:
   schedule:
-    - cron: '15 4 * * *'  # denne ~06:15 CET/CEST
+    - cron: '15 4 * * *'   # denne 06:15 CET/CEST
   workflow_dispatch:
 
 permissions:
@@ -32,11 +32,11 @@ jobs:
 }
 PKG
           fi
-          npm i cheerio@^1
+          npm ci || npm i
 
       - name: Run fetcher
         env:
-          SOURCE_URL: ${{ secrets.SOURCE_URL }}   # nastavíš o chvíľu
+          SOURCE_URL: ${{ secrets.SOURCE_URL }}
           SELECTOR: '#jedalnylistok .vc_single_image-wrapper img, #jedalnylistok img'
           OUTPUT_PATH: 'assets/menu.jpg'
         run: node scripts/fetch_menu.js
