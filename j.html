@@ -194,8 +194,8 @@
         const isCoarse = window.matchMedia('(pointer: coarse)').matches; // mobily/tablety
       
         if (card && !prefersReduced && !isCoarse) {
-          const MAX = 10;      // max uhol v stupňoch
-          const SHEEN = 24;    // rozsah posunu odlesku v px
+          const MAX = 4;      // max uhol v stupňoch
+          const SHEEN = 12;    // rozsah posunu odlesku v px
           let rafId = null;
       
           function onMove(e){
