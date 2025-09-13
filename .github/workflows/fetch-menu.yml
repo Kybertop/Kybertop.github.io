@@ -2,7 +2,7 @@ name: Update menu image
 
 on:
   schedule:
-    - cron: '15 4 * * *'   # denne 06:15 CET/CEST
+    - cron: '15 4 * * *'   # denne ~06:15 CET/CEST
   workflow_dispatch:
 
 permissions:
@@ -12,33 +12,21 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: Install deps
-        run: |
-          if [ ! -f package.json ]; then
-            cat > package.json <<'PKG'
-{
-  "name": "menu-fetcher",
-  "private": true,
-  "type": "module",
-  "dependencies": { "cheerio": "^1.0.0" }
-}
-PKG
-          fi
-          npm ci || npm i
+      # stačí nám cheerio, netreba package.json
+      - name: Install Cheerio
+        run: npm i cheerio@^1 --no-save
 
       - name: Run fetcher
         env:
           SOURCE_URL: ${{ secrets.SOURCE_URL }}
           SELECTOR: '#jedalnylistok .vc_single_image-wrapper img, #jedalnylistok img'
-          OUTPUT_PATH: 'assets/menu.jpg'
+          OUTPUT_PATH: assets/menu.jpg
         run: node scripts/fetch_menu.js
 
       - name: Commit & push if changed
