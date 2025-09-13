@@ -25,7 +25,7 @@ jobs:
       - name: Run fetcher
         env:
           SOURCE_URL: ${{ secrets.SOURCE_URL }}
-          SELECTOR: '#jedalnylistok .vc_single_image-wrapper img, #jedalnylistok img'
+          SELECTOR: '.wpb_single_image .vc_single_image-wrapper img, .vc_single_image-wrapper img, img.vc_single_image-img'
           OUTPUT_PATH: assets/menu.jpg
         run: node scripts/fetch_menu.js
 
