@@ -1,5 +1,148 @@
-<img id="menuImg" alt="Jedálny lístok" style="max-width:100%;height:auto">
+<!-- === Jedálny lístok (card) === -->
+<style>
+  :root{
+    /* doladíš farbu akcentu podľa webu */
+    --accent: #00e0a8;
+    --radius: 16px;
+    --card-bg: rgba(255,255,255,0.6);
+    --card-border: rgba(0,0,0,0.08);
+    --text-muted: #6b7280;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+      --text-muted: #9aa3b2;
+    }
+  }
+
+  .menu-card{
+    width: min(1100px, 92vw);
+    margin: 32px auto;
+    padding: 18px 18px 22px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    backdrop-filter: saturate(120%) blur(6px);
+  }
+  .menu-card__head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 12px; margin-bottom: 12px;
+  }
+  .menu-card__title{
+    display:flex; align-items:center; gap:10px; font-weight:700;
+    letter-spacing:.2px;
+  }
+  .menu-pill{
+    font-size:.8rem; color:var(--accent);
+    border:1px solid color-mix(in oklab, var(--accent) 60%, transparent);
+    padding:3px 8px; border-radius: 999px;
+  }
+  .menu-updated{
+    font-size:.9rem; color: var(--text-muted);
+  }
+
+  .menu-figure{
+    position:relative; overflow:hidden; border-radius: calc(var(--radius) - 4px);
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.03), transparent 120%);
+    display:grid; place-items:center;
+  }
+  /* skeleton načítavania */
+  .menu-figure::before{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(90deg,
+      transparent, rgba(0,0,0,.06), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.2s infinite;
+    opacity:.35;
+  }
+  .menu-figure.loaded::before{ display:none; }
+  @keyframes shimmer{ to { transform: translateX(100%); } }
+
+  .menu-img{
+    width:100%; height:auto; display:block;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .menu-img:hover{
+    transform: scale(1.01);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+  }
+
+  .menu-actions{
+    display:flex; justify-content:flex-end; gap:10px; margin-top:10px;
+  }
+  .btn{
+    padding:8px 12px; border-radius:10px; border:1px solid var(--card-border);
+    background: transparent; color:inherit; cursor:pointer;
+  }
+  .btn-accent{
+    border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+    color: var(--accent);
+  }
+</style>
+
+<section class="menu-card" aria-labelledby="menu-title">
+  <div class="menu-card__head">
+    <div class="menu-card__title">
+      <!-- jednoduchá ikonka -->
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 4h2v16H3zM9 4h2v7a2 2 0 0 1-2 2v7H7v-7a2 2 0 0 1-2-2V4h2v6h2V4zm6 0h2v7h3v2h-3v7h-2V4z" fill="currentColor"/>
+      </svg>
+      <h2 id="menu-title">Jedálny lístok</h2>
+      <span class="menu-pill">auto-update</span>
+    </div>
+    <time class="menu-updated" id="menuUpdated" datetime="">Aktualizované — …</time>
+  </div>
+
+  <figure class="menu-figure" id="menuFigure">
+    <img
+      id="menuImg"
+      class="menu-img"
+      alt="Jedálny lístok"
+      loading="lazy"
+      decoding="async"
+    >
+  </figure>
+
+  <div class="menu-actions">
+    <a class="btn btn-accent" id="openFull" href="/assets/menu.jpg" target="_blank" rel="noopener">Otvoriť v plnom rozlíšení</a>
+  </div>
+</section>
+
 <script>
-  const d = new Date().toISOString().slice(0,10);
-  document.getElementById('menuImg').src = '/assets/menu.jpg?v=' + d;
+  // nastav src s cache-bustom podľa dátumu
+  (function () {
+    const today = new Date().toISOString().slice(0,10);
+    const img = document.getElementById('menuImg');
+    const figure = document.getElementById('menuFigure');
+    img.src = '/assets/menu.jpg?v=' + today;
+
+    function markLoaded(){ figure.classList.add('loaded'); }
+    if (img.complete) markLoaded();
+    else img.addEventListener('load', markLoaded);
+
+    // voliteľne: zobraz "Aktualizované" z JSONu, ktorý vytvára workflow
+    fetch('/assets/menu.jpg.json', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const el = document.getElementById('menuUpdated');
+        if (!data) { el.textContent = 'Aktualizované — dnes'; return; }
+        const dt = new Date(data.fetchedAt || Date.now());
+        el.dateTime = dt.toISOString();
+        el.textContent = 'Aktualizované — ' + dt.toLocaleString('sk-SK', { dateStyle:'medium', timeStyle:'short' });
+        // zároveň nech sa "Otvoriť v plnom" link vždy trafí aktuálny súbor
+        const full = document.getElementById('openFull');
+        full.href = (data.img || '/assets/menu.jpg') + '?v=' + today;
+      })
+      .catch(() => {});
+    
+    // fallback pri chybe načítania
+    img.addEventListener('error', () => {
+      figure.classList.add('loaded');
+      img.alt = 'Nepodarilo sa načítať jedálny lístok.';
+    });
+  })();
 </script>
