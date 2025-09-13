@@ -46,7 +46,7 @@
     background:linear-gradient(90deg,transparent,var(--accent) 20%,var(--accent) 80%,transparent);
   }
   .energo-menu .head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
-  .energo-menu .title{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px; }
+  .energo-menu .title{ display:flex; align-items:center; gap:10px; letter-spacing:.2px; font-family: Tahoma; }
   .energo-menu .chip{ padding:2px 8px; border-radius:999px; font-size:.78rem;
     border:1px solid color-mix(in oklab, var(--accent) 60%, transparent); color:var(--accent); }
   .energo-menu .updated{ color:var(--muted); font-size:.9rem; }
@@ -91,9 +91,6 @@
   <div class="card" aria-labelledby="menu-title">
     <div class="head">
       <div class="title">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M3 15h6l3-10 4 15 3-9h2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
         <h2 id="menu-title">Jedálny lístok</h2>
       </div>
       <time class="updated" id="menuUpdated" datetime="">Aktualizované — …</time>
