@@ -24,7 +24,8 @@
       <style>
 
           :root{
-            --bg:#0c0c0d; --panel:#111113; --text:#e6e6e8; --muted:#b6b6bb;
+            --bg:#ffffff; --panel:#111113; --text:#e6e6e8; --muted:#b6b6bb;
+            --fonntcolor:#ffffff;
             --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Cantarell,"Noto Sans","Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";
           }
 
@@ -48,10 +49,10 @@
          background:linear-gradient(90deg,transparent,var(--accent) 20%,var(--accent) 80%,transparent);
          }
          .energo-menu .head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
-         .energo-menu .title{ display:flex; align-items:center; gap:10px; letter-spacing:.2px; font-family:var(--font) }
+         .energo-menu .title{ color:var(fontcolor); display:flex; align-items:center; gap:10px; letter-spacing:.2px; font-family:var(--font) }
          .energo-menu .chip{ padding:2px 8px; border-radius:999px; font-size:.78rem;
          border:1px solid color-mix(in oklab, var(--accent) 60%, transparent); color:var(--accent); }
-         .energo-menu .updated{ color:var(--muted); font-size:.9rem; }
+         .energo-menu .updated{ color:var(--accent); font-size:.9rem; }
          .energo-menu .figure{ position:relative; overflow:hidden; border-radius:calc(var(--radius) - 6px);
          background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 120%); display:grid; place-items:center; }
          .energo-menu .figure::after{ content:""; position:absolute; inset:0;
