@@ -8,17 +8,14 @@ const WEBHOOKS = {
   '2.G': 'https://discord.com/api/webhooks/1415263909690216478/7wiamXx6uKt8ACkZ7hczpUVGI76gGk38k6Em3N0-mhukseBy5noEPATg6l6y70z91DDH'
 };
 
-/* Názov bota pre odoslané správy */
 const BOT_NAME = 'Energo';
 
 document.addEventListener('DOMContentLoaded', () => {
   const $  = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 
-  /* === Rok vo footeri === */
   const y = $('#year'); if (y) y.textContent = new Date().getFullYear();
 
-  /* === Jednoduchý router (sekcie ako podstránky) === */
   const pages = $$('[data-page]');
   const tabs  = $$('a[data-route]');
   function showPage(id){
@@ -31,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('hashchange', () => showPage(getId()));
   showPage(getId());
 
-  /* === Hamburger menu (mobily) === */
   const hdr = document.querySelector('header');
   const toggle = $('#menuToggle');
   const panel  = $('#mobilePanel');
@@ -41,9 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
   panel?.addEventListener('click', (e)=>{ if (e.target.closest('a[data-route]')) closeMenu(); });
   window.addEventListener('hashchange', closeMenu);
 
-  /* ===================================================
-     POZNÁMKY (načítanie z notes.json s fallbackom na notes.js)
-     =================================================== */
   let NOTES_DATA = [];
   const wrap = $('#notesWrap'), empty = $('#emptyState');
   const selDept = $('#dept'), selClass = $('#klass'), inputQ = $('#query');
@@ -133,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderNotes();
   });
 
-  // tlačidlá MPS/TITT
   $$('.toggle[data-dept]').forEach(btn => {
     btn.addEventListener('click', () => {
       const val = btn.dataset.dept || '';
@@ -146,9 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadNotes();
 
-  /* ===================================================
-     ODOSLANIE PRÁCE – modálne okno + webhook POST
-     =================================================== */
   const dialog = $('#uploadDialog');
   $('#btnUpload')?.addEventListener('click', ()=> dialog?.showModal());
   $('#cancelUpload')?.addEventListener('click', ()=> dialog?.close());
