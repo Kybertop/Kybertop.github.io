@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!cls || !wh){ e.preventDefault(); alert('Vyber triedu (alebo chýba webhook).'); return; }
 
     // odosielame priamo na webhook, ale s wait=true nech sa stránka pri refreshe nepýta na resend
-    form.action = wh + 'https://energo-relay.kybertop505.workers.dev/';
+    form.action = 'https://energo-relay.kybertop505.workers.dev/';
 
     const now = new Date();
     const dateStr = now.toLocaleString('sk-SK', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
