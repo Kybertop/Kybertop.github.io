@@ -98,6 +98,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('mcRefresh')?.addEventListener('click', render);
-    document.getElementById('mcCopy')?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText('energo.ddns.net'); }catch(_){}});
+    document.getElementById('mcCopy')?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText('energo.ddns.net:443'); }catch(_){}});
   });
 })();
