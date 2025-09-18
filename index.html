@@ -198,12 +198,19 @@
     </section>
     </main>
 
-  <footer>
-    <div class="container foot">
-      <div class="sig"><svg class="bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg> Energo je cesta</div>
-      <div class="copy">© <span id="year"></span> Energo</div>
+<footer>
+  <div class="container foot">
+    <div class="sig"><svg class="bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg> Energo je cesta</div>
+
+    <div id="breakWidget" class="break-widget" aria-live="polite">
+      <span id="bwTime" class="bw-time">--:--:--</span>
+      <span id="bwLabel" class="bw-badge">Mimo prestávky</span>
     </div>
-  </footer>
+
+    <div class="copy">© <span id="year"></span> Energo</div>
+  </div>
+</footer>
+
 
   <!-- ===== Upload modal (dialog) ===== -->
   <dialog id="uploadDialog">
