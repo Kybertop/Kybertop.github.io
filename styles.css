@@ -223,36 +223,28 @@ h1,h2,h3,h4,h5,h6{color:var(--text)}
 .bw-grid2{
   display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:center
 }
-.bw-card{display:flex;align-items:center;justify-content:center;gap:10px;min-height:36px;
-  border:1px solid transparent;border-radius:10px;padding:4px 8px;transition:border-color .2s, box-shadow .2s, background .2s}
+.bw-card{display:flex;align-items:center;justify-content:center;gap:10px;min-height:36px}
 .bw-title{color:var(--muted);font-weight:800;font-size:12px;letter-spacing:.2px}
 
-/* Badge – len JEDNA bodka (.dot) + zelený outline počas prestávky */
+/* ---- Badge: jediná bodka + outline logika ---- */
 .bw-badge{
   display:inline-flex;align-items:center;gap:8px;
-  padding:6px 10px;border-radius:999px;border:1.5px solid var(--border);
-  background:linear-gradient(180deg,#131315,#101013);font-weight:800;line-height:1;
-  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease
+  padding:6px 10px;border-radius:999px;
+  border:2px solid #2b2b2f;                  /* tmavý okraj mimo prestávky */
+  background:linear-gradient(180deg,#131315,#101013);
+  font-weight:800;line-height:1;
+  transition:border-color .2s ease, box-shadow .2s ease;
 }
+.bw-badge::before{content:none !important;display:none !important} /* žiadne pseudo-bodky */
 .bw-badge .dot{
-  width:8px;height:8px;border-radius:999px;display:inline-block;flex:0 0 8px;background:var(--accent)
+  width:8px;height:8px;border-radius:999px;display:inline-block;flex:0 0 8px;
+  background:var(--accent);                   /* červená mimo prestávky */
 }
-.bw-badge::before,
-.bw-badge.on::before,
-.bw-badge.off::before{content:none !important;display:none !important}
-
-.bw-badge.on  {border-color:var(--good-700) !important;box-shadow:0 0 0 2px rgba(34,197,94,.22) !important}
-.bw-badge.on .dot{background:var(--good) !important}
-
-.break-widget .bw-badge { 
-  border: 2px solid var(--border);               /* základ (pevná čiara) */
-  border-radius: 999px;
+.bw-badge.on{
+  border-color:var(--good-700) !important;    /* zelený outline počas prestávky */
+  box-shadow:0 0 0 2px rgba(34,197,94,.25) !important;
 }
-
-.break-widget .bw-badge.on {
-  border-color: var(--good-700) !important;      /* zelený rámik */
-  box-shadow: 0 0 0 2px rgba(34,197,94,.25) !important; /* jemný "glow" */
-}
+.bw-badge.on .dot{ background:var(--good) !important; }
 
 @media (max-width:820px){
   .bw-grid2{grid-template-columns:1fr}
