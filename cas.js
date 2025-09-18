@@ -1,8 +1,8 @@
-// cas.js – hodiny + stav prestávok s typom (Teória / Prax / Prax na teórii)
+// cas.js – hodiny + stav prestávok s typom + tooltip "najbližšia/končí o"
 (() => {
   const TIMEZONE = 'Europe/Bratislava';
 
-  // ⬇️ Upraviť podľa potreby (24h HH:MM). Pri teórii uveďeme priamo typ.
+  // ⬇️ Upraviť podľa potreby (24h HH:MM)
   const SCHEDULES = {
     prax: [
       { start: '09:05', end: '09:20', label: 'Prestávka' },
@@ -28,7 +28,6 @@
   const widget = document.getElementById('breakWidget');
   if (!widget) return;
 
-  // Vygenerujeme obsah widgetu: čas hore, separator, grid Teória | Prax | Prax(na teórii)
   widget.innerHTML = `
     <div class="bw-top">
       <span id="bwTime" class="bw-time">--:--:--</span>
@@ -37,22 +36,22 @@
     <div class="bw-grid2">
       <div class="bw-card" data-key="teoria">
         <div class="bw-title">Teória</div>
-        <span class="bw-badge off"><span class="dot"></span><span class="txt">Nie je prestávka</span></span>
+        <span class="bw-badge off" title="Načítavam…"><span class="dot"></span><span class="txt">Nie je prestávka</span></span>
       </div>
       <div class="bw-card" data-key="prax">
         <div class="bw-title">Prax</div>
-        <span class="bw-badge off"><span class="dot"></span><span class="txt">Nie je prestávka</span></span>
+        <span class="bw-badge off" title="Načítavam…"><span class="dot"></span><span class="txt">Nie je prestávka</span></span>
       </div>
       <div class="bw-card" data-key="prax_teoria">
         <div class="bw-title">Prax (na teórii)</div>
-        <span class="bw-badge off"><span class="dot"></span><span class="txt">Nie je prestávka</span></span>
+        <span class="bw-badge off" title="Načítavam…"><span class="dot"></span><span class="txt">Nie je prestávka</span></span>
       </div>
     </div>
   `;
 
   const bwTime = document.getElementById('bwTime');
 
-  // formátovače času
+  // formatéry času (lokalizované, ale potrebujeme aj prácu s minútami)
   const fmtClock = new Intl.DateTimeFormat('sk-SK', {
     timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
@@ -60,45 +59,74 @@
     timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: false
   });
 
-  // helpers
-  const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+  // helpery
+  const toMin = (hhmm) => { const [h,m] = hhmm.split(':').map(Number); return h*60 + m; };
+  const pad2 = (n) => n.toString().padStart(2,'0');
   const minutesNowTZ = () => {
     const parts = fmtHM.formatToParts(new Date());
-    const h = Number(parts.find(p => p.type === 'hour').value);
-    const m = Number(parts.find(p => p.type === 'minute').value);
-    return h * 60 + m;
+    const h = Number(parts.find(p=>p.type==='hour').value);
+    const m = Number(parts.find(p=>p.type==='minute').value);
+    return h*60 + m;
+  };
+  const diffStr = (mins) => {
+    if (mins <= 0) return 'o chvíľu';
+    if (mins < 60) return `za ${mins} min`;
+    const h = Math.floor(mins/60), m = mins%60;
+    return m ? `za ${h} h ${m} min` : `za ${h} h`;
   };
 
-  // vráti label pre aktuálny interval alebo null
-  const currentLabel = (ranges) => {
+  // nájde aktuálny interval (ak beží) alebo najbližší, spolu s tooltip textom
+  function computeState(ranges){
     const now = minutesNowTZ();
-    for (const r of ranges) {
-      const s = toMin(r.start), e = toMin(r.end);
-      if (now >= s && now < e) return r.label || 'Prestávka';
-    }
-    return null;
-  };
+    let current = null;
+    let next = null;
 
-  // dostane "kľúč" (teoria/prax/prax_teoria) a nastaví badge
-  function setBadge(key, label) {
+    for (const r of ranges){
+      const s = toMin(r.start), e = toMin(r.end);
+      if (now >= s && now < e){ current = { ...r, s, e }; break; }
+      if (s > now && (!next || s < next.s)) next = { ...r, s, e };
+    }
+
+    if (current){
+      const left = current.e - now;
+      return {
+        on: true,
+        label: current.label || 'Prestávka',
+        tooltip: `Končí o ${current.end} (${diffStr(left)})`
+      };
+    }
+    if (next){
+      const until = next.s - now;
+      return {
+        on: false,
+        label: 'Nie je prestávka',
+        tooltip: `Najbližšia o ${next.start} (${diffStr(until)})`
+      };
+    }
+    return { on:false, label:'Nie je prestávka', tooltip:'Dnes už bez prestávky' };
+  }
+
+  function setBadge(key, state){
     const b = widget.querySelector(`.bw-card[data-key="${key}"] .bw-badge`);
     if (!b) return;
     const txt = b.querySelector('.txt');
-    const isOn = !!label;
 
-    b.classList.toggle('on',  isOn);
-    b.classList.toggle('off', !isOn);
-    txt.textContent = isOn ? label : 'Nie je prestávka';
+    b.classList.toggle('on',  state.on);
+    b.classList.toggle('off', !state.on);
+    txt.textContent = state.on ? state.label : 'Nie je prestávka';
+    b.setAttribute('title', state.tooltip);
+    // aj pre klávesnicu:
+    b.setAttribute('aria-label', `${key}: ${txt.textContent}. ${state.tooltip}`);
   }
 
-  function tick() {
+  function tick(){
     // hodiny
     bwTime.textContent = fmtClock.format(new Date());
 
-    // stavy
-    setBadge('teoria',      currentLabel(SCHEDULES.teoria));
-    setBadge('prax',        currentLabel(SCHEDULES.prax));
-    setBadge('prax_teoria', currentLabel(SCHEDULES.prax_teoria));
+    // stavy + tooltipy
+    setBadge('teoria',      computeState(SCHEDULES.teoria));
+    setBadge('prax',        computeState(SCHEDULES.prax));
+    setBadge('prax_teoria', computeState(SCHEDULES.prax_teoria));
   }
 
   tick();
