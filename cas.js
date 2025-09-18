@@ -110,13 +110,15 @@
     const b = widget.querySelector(`.bw-card[data-key="${key}"] .bw-badge`);
     if (!b) return;
     const txt = b.querySelector('.txt');
-
+    const cardEl = b.closest('.bw-card');            // ⬅️ pridané
+  
     b.classList.toggle('on',  state.on);
     b.classList.toggle('off', !state.on);
     txt.textContent = state.on ? state.label : 'Nie je prestávka';
     b.setAttribute('title', state.tooltip);
-    // aj pre klávesnicu:
     b.setAttribute('aria-label', `${key}: ${txt.textContent}. ${state.tooltip}`);
+  
+    cardEl?.classList.toggle('on',  state.on);      // ⬅️ pridané (voliteľné zvýraznenie karty)
   }
 
   function tick(){
