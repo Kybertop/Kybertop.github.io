@@ -1,16 +1,38 @@
-// cas.js – hodiny + informácia o prestávke vo footeri (nezávislé od app.js)
+// cas.js – hodiny + stav prestávok (Prax / Prax na teórii / Teória)
 (() => {
-  // ⬇️ sem si vieš ľahko upraviť prestávky (24h formát HH:MM)
-  const BREAKS = [
-    { start: '09:20', end: '09:35', label: 'Prestávka' },
-    { start: '12:45', end: '13:15', label: 'Prestávka' },
-  ];
   const TIMEZONE = 'Europe/Bratislava';
 
-  const bwTime  = document.getElementById('bwTime');
-  const bwLabel = document.getElementById('bwLabel');
-  if (!bwTime || !bwLabel) return; // widget nie je na stránke
+  // ⬇️ Sem upravuj časy (24h HH:MM). Môžeš pridávať/mazať intervaly.
+  const SCHEDULES = {
+    prax: [
+      ['09:05','09:20'],
+      ['12:45','13:15'], // obedová
+    ],
+    prax_teoria: [
+      ['09:20','09:35'],
+      ['12:45','13:15'], // obedová
+    ],
+    teoria: [
+      ['07:50','07:55'],
+      ['08:40','08:45'],
+      ['09:30','09:45'], // dlhá
+      ['10:30','10:35'],
+      ['11:20','11:25'],
+      ['12:10','12:40'], // obedová
+      ['13:25','13:30'],
+      ['14:35','14:40'],
+      ['15:45','15:50'],
+    ],
+  };
 
+  const widget = document.getElementById('breakWidget');
+  if (!widget) return;
+
+  // pôvodný jeden badge schováme (ak existuje)
+  const oldBadge = document.getElementById('bwLabel'); if (oldBadge) oldBadge.style.display = 'none';
+
+  // čas
+  const bwTime = document.getElementById('bwTime');
   const fmtClock = new Intl.DateTimeFormat('sk-SK', {
     timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
@@ -18,32 +40,57 @@
     timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: false
   });
 
-  const toMin = (hhmm) => {
-    const [h, m] = hhmm.split(':').map(Number);
-    return h * 60 + m;
+  // vytvoríme grid troch „kariet“
+  const grid = document.createElement('div');
+  grid.id = 'bwGrid';
+  grid.className = 'bw-grid';
+  grid.innerHTML = `
+    <div class="bw-card" data-key="prax">
+      <div class="bw-title">Prax</div>
+      <span class="bw-badge off"><span class="dot"></span>Prestávka</span>
+    </div>
+    <div class="bw-card" data-key="prax_teoria">
+      <div class="bw-title">Prax (na teórii)</div>
+      <span class="bw-badge off"><span class="dot"></span>Prestávka</span>
+    </div>
+    <div class="bw-card wide" data-key="teoria">
+      <div class="bw-title">Teória</div>
+      <span class="bw-badge off"><span class="dot"></span>Prestávka</span>
+    </div>
+  `;
+  widget.appendChild(grid);
+
+  const card = (key) => grid.querySelector(`.bw-card[data-key="${key}"] .bw-badge`);
+
+  const toMin = (hhmm) => { const [h,m] = hhmm.split(':').map(Number); return h*60+m; };
+  const minutesNowTZ = () => {
+    const parts = fmtHM.formatToParts(new Date());
+    const h = Number(parts.find(p=>p.type==='hour').value);
+    const m = Number(parts.find(p=>p.type==='minute').value);
+    return h*60 + m;
   };
 
-  function minutesNowTZ() {
-    const parts = fmtHM.formatToParts(new Date());
-    const h = Number(parts.find(p => p.type === 'hour').value);
-    const m = Number(parts.find(p => p.type === 'minute').value);
-    return h * 60 + m;
-  }
+  const inAnyBreak = (list) => {
+    const now = minutesNowTZ();
+    return list.some(([s,e]) => now >= toMin(s) && now < toMin(e));
+  };
 
-  function tick() {
-    bwTime.textContent = fmtClock.format(new Date());
+  function tick(){
+    if (bwTime) bwTime.textContent = fmtClock.format(new Date());
 
-    const nowMin = minutesNowTZ();
-    let inBreak = false;
-    let label = 'Mimo prestávky';
-    for (const { start, end, label: l } of BREAKS) {
-      const s = toMin(start), e = toMin(end);
-      if (nowMin >= s && nowMin < e) { inBreak = true; label = l || 'Prestávka'; break; }
+    const states = {
+      prax:        inAnyBreak(SCHEDULES.prax),
+      prax_teoria: inAnyBreak(SCHEDULES.prax_teoria),
+      teoria:      inAnyBreak(SCHEDULES.teoria),
+    };
+
+    for (const [k,on] of Object.entries(states)) {
+      const badge = card(k);
+      if (!badge) continue;
+      badge.classList.toggle('on',  on);
+      badge.classList.toggle('off', !on);
+      // text ostáva stále "Prestávka" – farba bodky hovorí, či práve je (zelená) alebo nie (červená)
     }
-
-    bwLabel.textContent = inBreak ? `Prebieha ${label.toLowerCase()}` : 'Mimo prestávky';
-    bwLabel.classList.toggle('on',  inBreak);
-    bwLabel.classList.toggle('off', !inBreak);
   }
 
   tick();
