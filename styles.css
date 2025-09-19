@@ -249,3 +249,65 @@ h1,h2,h3,h4,h5,h6{color:var(--text)}
 @media (max-width:820px){
   .bw-grid2{grid-template-columns:1fr}
 }
+
+/* ===== Breaks Modal (pre rozpis) ===== */
+#breaksDialog{ border:none; padding:0; background:transparent; }
+#breaksDialog::backdrop{ background:rgba(0,0,0,.6); backdrop-filter:blur(2px); }
+
+.brm{
+  width:min(980px, 94vw);
+  background:linear-gradient(180deg,#111113,#0f0f11);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  color:var(--text);
+}
+
+.brm-head{
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  gap:12px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.brm-title{ font-weight:800; letter-spacing:.3px; }
+.brm-clock{ font-variant-numeric:tabular-nums; font-weight:800; }
+
+.brm-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:14px;
+}
+@media (max-width:900px){
+  .brm-grid{ grid-template-columns:1fr; }
+}
+
+.brm-col{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+  background:linear-gradient(180deg,#131315,#101013);
+}
+.brm-col-title{ margin:0 0 8px; color:var(--muted); font-weight:800; }
+
+.brm-badge-wrap{ margin-bottom:8px; }
+.brm-next{ margin:4px 0 10px; }
+
+.brm-list{
+  list-style:none; padding:0; margin:0;
+  display:grid; gap:8px;
+}
+.brm-list li{
+  display:flex; align-items:center; justify-content:space-between;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:8px 10px;
+  background:#121215;
+}
+.brm-list li .time{ font-weight:700; }
+.brm-list li .tag{ color:var(--muted); font-size:13px; }
+
+/* zvýraznenie „teraz“ a „najbližšej“ */
+.brm-list li.is-current{ border-color:var(--good-700); box-shadow:0 0 0 2px rgba(34,197,94,.22); }
+.brm-list li.is-next{ border-color:var(--accent); box-shadow:0 0 0 2px rgba(225,29,46,.18); }
