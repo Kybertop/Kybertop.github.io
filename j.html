@@ -26,7 +26,7 @@
 
     .wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
 
-    /* === Card (jednotný štýl) === */
+    /* === Card === */
     .card{
       width:min(1000px,94vw); margin:clamp(16px,4vw,40px) auto; padding:18px 18px 22px;
       background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 120%),var(--surface);
@@ -43,7 +43,6 @@
       pointer-events:none;
     }
     .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .title{display:flex;align-items:center;gap:10px}
     .title h1{font-size:clamp(20px,3.2vw,26px);margin:0}
     .updated{color:var(--muted);font-weight:600}
 
@@ -61,9 +60,7 @@
     .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px;flex-wrap:wrap}
     .btn{padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:transparent;color:inherit;text-decoration:none;font-weight:800}
     .btn:hover{border-color:var(--accent)}
-    .btn-accent{border-color:color-mix(in oklab, var(--accent) 60%, transparent);color:var(--accent)}
 
-    /* jemný sheen/tilt */
     .card::after{
       content:""; position:absolute; inset:-1px; border-radius:var(--radius); pointer-events:none;
       background:radial-gradient(320px 200px at calc(50% + var(--sheen-x,0px)) calc(50% + var(--sheen-y,0px)),
@@ -71,44 +68,40 @@
       opacity: var(--sheen-opacity,0); mix-blend-mode:screen; transition:opacity .25s;
     }
 
-    /* === Lightbox (bez „black barov“) === */
+    /* === Lightbox === */
     .lightbox{position:fixed;inset:0;display:none;place-items:center;z-index:50;background:rgba(0,0,0,.76);backdrop-filter:blur(2px)}
     .lightbox.open{display:grid}
     .lb-inner{
-      position:relative;
-      width:min(95vw,1200px);
-      max-height:92vh;
-      overflow:hidden;         /* skry panovanie mimo rám */
-      display:grid;place-items:center;
+      position:relative; width:min(95vw,1200px); max-height:92vh;
+      overflow:hidden; display:grid; place-items:center;
     }
     .lb-img{
-      display:block;
-      max-width:none; max-height:none; /* vlastné fitovanie robíme sami */
+      display:block; max-width:none; max-height:none;
       border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.55);
-      will-change:transform;
-      transform-origin:0 0;             /* pre zoom okolo kurzora */
-      cursor:grab;
-      image-rendering:auto;
+      will-change:transform; transform-origin:0 0;
+      cursor:grab; image-rendering:auto;
+      /* zabráň natívnemu drag & výberu */
+      user-select:none; -webkit-user-drag:none; -webkit-user-select:none; 
+      touch-action:none;
       animation:lbIn .16s ease-out;
     }
     .lb-img.grabbing{ cursor:grabbing; }
     @keyframes lbIn{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
-    .lb-close{position:absolute;top:8px;right:8px;border:none;cursor:pointer;border-radius:10px;padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;font-weight:800}
-    .lb-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
     .lb-hint{
-      position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
-      font-size:12px;color:#e2e2e6; opacity:.8; background:rgba(0,0,0,.35);
-      padding:6px 10px;border-radius:999px; pointer-events:none; user-select:none;
+      position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
+      font-size:13px; font-weight:700;
+      color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6);
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.18);
+      padding:8px 12px;border-radius:999px;
+      pointer-events:none; user-select:none;
     }
 
-    /* Mobile */
     @media (max-width:640px){
       .card{padding:14px}
-      .title h1{font-size:1.06rem}
       .updated{font-size:.9rem}
-      .actions{justify-content:center}
-      .lb-hint{font-size:11px}
+      .lb-hint{font-size:12px}
     }
     @media (prefers-reduced-motion:reduce){
       .card{transition:none}
@@ -137,9 +130,8 @@
   <!-- Lightbox -->
   <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Zväčšený jedálny lístok">
     <div class="lb-inner" id="lbViewport">
-      <button class="lb-close" id="lbClose" type="button">✕</button>
-      <img class="lb-img" id="lbImg" alt="">
-      <div class="lb-hint">Kolieskom priblíženie • Ťahaním posun</div>
+      <img class="lb-img" id="lbImg" alt="" draggable="false">
+      <div class="lb-hint">Kolieskom priblíženie • Ťahaním posun • Kliknutím mimo zatvoríš</div>
     </div>
   </div>
 
@@ -175,11 +167,12 @@
       // Lightbox + zoom & drag
       const lb       = document.getElementById('lb');
       const lbImg    = document.getElementById('lbImg');
-      const lbClose  = document.getElementById('lbClose');
       const viewport = document.getElementById('lbViewport');
 
       const S = { scale:1, min:1, max:8, tx:0, ty:0, vw:0, vh:0, iw:0, ih:0 };
       let dragging = false, sx=0, sy=0, ox=0, oy=0;
+
+      lbImg.addEventListener('dragstart', e => e.preventDefault());
 
       function fitToViewport(){
         S.vw = viewport.clientWidth;
@@ -187,12 +180,10 @@
         S.iw = lbImg.naturalWidth  || lbImg.width;
         S.ih = lbImg.naturalHeight || lbImg.height;
 
-        // „contain“ fit (bez barov vnútri kontajnera)
         const sx = S.vw / S.iw, sy = S.vh / S.ih;
         S.min   = Math.min(sx, sy);
         S.scale = S.min;
 
-        // centrovanie
         S.tx = (S.vw - S.iw * S.scale) * 0.5;
         S.ty = (S.vh - S.ih * S.scale) * 0.5;
         apply();
@@ -203,7 +194,6 @@
       function openLB(){
         lbImg.src = img.dataset.full || img.src;
         lb.classList.add('open');
-        lbClose.focus();
         if (lbImg.complete) fitToViewport();
         else lbImg.onload = fitToViewport;
       }
@@ -218,26 +208,19 @@
         const ns = Math.min(S.max, Math.max(S.min, S.scale * factor));
         if (ns === S.scale) return;
 
-        // bod v obrázku pod kurzorom (pred zmenou scale)
         const imgX = (x - S.tx) / S.scale;
         const imgY = (y - S.ty) / S.scale;
 
-        // nový posun tak, aby NEMENIL bod pod kurzorom
         S.tx = x - imgX * ns;
         S.ty = y - imgY * ns;
 
-        // ak ideš naspäť na fit, znova presne na stred a žiadne posúvanie
-        if (ns <= S.min){
-          fitToViewport();
-          return;
-        }
+        if (ns <= S.min){ fitToViewport(); return; }
         S.scale = ns;
         clampTranslate();
         apply();
       }
 
       function clampTranslate(){
-        // nech obrázok neodíde úplne mimo viewport
         const w = S.iw * S.scale, h = S.ih * S.scale;
         const minX = Math.min(0, S.vw - w), maxX = Math.max(0, S.vw - w);
         const minY = Math.min(0, S.vh - h), maxY = Math.max(0, S.vh - h);
@@ -247,14 +230,16 @@
 
       // drag
       function onDown(e){
-        if (S.scale <= S.min) return; // pri fit nepohybujeme
+        if (S.scale <= S.min) return;
+        e.preventDefault(); // zastav natívny drag/select
         dragging = true; lbImg.classList.add('grabbing');
         sx = e.clientX; sy = e.clientY; ox = S.tx; oy = S.ty;
-        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointermove', onMove, { passive:false });
         window.addEventListener('pointerup', onUp, { once:true });
       }
       function onMove(e){
         if (!dragging) return;
+        e.preventDefault();
         S.tx = ox + (e.clientX - sx);
         S.ty = oy + (e.clientY - sy);
         clampTranslate();
@@ -268,8 +253,6 @@
       // events
       img.addEventListener('click', openLB);
       lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
-      lbClose.addEventListener('click', closeLB);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('open')) closeLB(); });
 
       viewport.addEventListener('wheel', e=>{
         e.preventDefault();
@@ -279,10 +262,9 @@
       }, { passive:false });
 
       lbImg.addEventListener('pointerdown', onDown);
-
       window.addEventListener('resize', ()=>{ if(lb.classList.contains('open')) fitToViewport(); });
 
-      // jemný tilt na karte (zjemnené)
+      // jemný tilt na karte
       const card = document.getElementById('menuCard');
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const isCoarse = window.matchMedia('(pointer: coarse)').matches;
@@ -297,14 +279,14 @@
             card.style.setProperty('--sheen-opacity', sheen ? '1' : '0');
           });
         }
-        function onMove(e){
+        function onMoveCard(e){
           const r = card.getBoundingClientRect();
           const px = (e.clientX - r.left) / r.width;
           const py = (e.clientY - r.top)  / r.height;
           applyTilt((px - .5)*(MAX*2), (0.5 - py)*(MAX*2), (px-.5)*SHEEN, (py-.5)*SHEEN, 1);
         }
         function reset(){ applyTilt(0,0,0,0,0); }
-        card.addEventListener('pointermove', onMove);
+        card.addEventListener('pointermove', onMoveCard);
         card.addEventListener('pointerleave', reset);
       }
     })();
