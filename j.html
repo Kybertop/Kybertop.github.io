@@ -1,239 +1,265 @@
-<!doctype html>
-<html lang="sk">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jedálny lístok | Energo</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='black'/%3E%3Cpath d='M12 40h12l4-16 8 24 6-16h10' stroke='white' stroke-width='4' fill='none'/%3E%3Cpath d='M8 20h16' stroke='%23ff1a1a' stroke-width='4'/%3E%3C/svg%3E" />
-
-  <style>
-    :root{
-      --bg:#0c0c0d; --surface:#111113; --text:#e6e6e8; --muted:#b6b6bb;
-      --accent:#e11d2e; --accent-700:#960b17; --border:#1e1f22; --radius:16px;
-      --shadow:0 12px 34px rgba(0,0,0,.35);
-      --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Cantarell,"Noto Sans","Helvetica Neue",Arial;
-    }
-    @media (prefers-color-scheme:light){
-      :root{ --bg:#f6f7f9; --surface:#ffffff; --text:#0c0c0d; --muted:#5b606a; --border:#e8e9ed; }
-    }
-
-    html,body{height:100%}
-    body{
-      margin:0; font-family:var(--font); color:var(--text);
-      background:linear-gradient(180deg,#0a0a0a 0%,#0f0f11 100%);
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-    }
-
-    .wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
-
-    /* === Card === */
-    .card{
-      width:min(1000px,94vw); margin:clamp(16px,4vw,40px) auto; padding:18px 18px 22px;
-      background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 120%),var(--surface);
-      border:1px solid var(--border); border-radius:var(--radius);
-      backdrop-filter:saturate(120%) blur(6px); box-shadow:var(--shadow);
-      position:relative; will-change:transform;
-      transform:perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0);
-      transition:transform .25s cubic-bezier(.2,.6,.2,1), box-shadow .25s;
-    }
-    .card::before{
-      content:""; position:absolute; left:-1px; right:-1px; top:-1px; height:3px; opacity:.95;
-      border-top-left-radius:calc(var(--radius)+2px); border-top-right-radius:calc(var(--radius)+2px);
-      background:linear-gradient(90deg,transparent,var(--accent) 22%,var(--accent) 78%,transparent);
-      pointer-events:none;
-    }
-    .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .title{display:flex;align-items:center;gap:10px}
-    .title h1{font-size:clamp(20px,3.2vw,26px);margin:0}
-    .updated{color:var(--muted);font-weight:600}
-
-    /* image area + shimmer */
-    .figure{position:relative;overflow:hidden;border-radius:calc(var(--radius) - 8px);background:#0f0f11}
-    .img{width:100%;height:auto;display:block;cursor:zoom-in;image-rendering:auto}
-    .figure::after{
-      content:"";position:absolute;inset:0;background:
-        linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.08),rgba(255,255,255,0));
-      transform:translateX(-100%);animation:shimmer 1.1s infinite;pointer-events:none
-    }
-    .figure.loaded::after{display:none}
-    @keyframes shimmer{to{transform:translateX(100%)}}
-
-    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px;flex-wrap:wrap}
-    .btn{padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:transparent;color:inherit;text-decoration:none;font-weight:800}
-    .btn:hover{border-color:var(--accent)}
-    .btn-accent{border-color:color-mix(in oklab, var(--accent) 60%, transparent);color:var(--accent)}
-
-    /* Subtle sheen following pointer/orientation */
-    .card::after{
-      content:""; position:absolute; inset:-1px; border-radius:var(--radius); pointer-events:none;
-      background:radial-gradient(320px 200px at calc(50% + var(--sheen-x,0px)) calc(50% + var(--sheen-y,0px)),
-        rgba(255,255,255,.10), rgba(255,255,255,0) 60%);
-      opacity: var(--sheen-opacity,0); mix-blend-mode:screen; transition:opacity .25s;
-    }
-
-    /* === Lightbox === */
-    .lightbox{position:fixed;inset:0;display:none;place-items:center;z-index:50;background:rgba(0,0,0,.76);backdrop-filter:blur(2px)}
-    .lightbox.open{display:grid}
-    .lb-inner{position:relative;width:min(95vw,1200px);max-height:92vh}
-    .lb-img{width:100%;height:auto;max-height:92vh;display:block;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.55);animation:lbIn .16s ease-out}
-    @keyframes lbIn{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
-    .lb-close{position:absolute;top:8px;right:8px;border:none;cursor:pointer;border-radius:10px;padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;font-weight:800}
-    .lb-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-
-    /* Mobile */
-    @media (max-width:640px){
-      .card{padding:14px}
-      .title h1{font-size:1.06rem}
-      .updated{font-size:.9rem}
-      .actions{justify-content:center}
-    }
-    @media (prefers-reduced-motion:reduce){
-      .card{transition:none}
-      .card::after{display:none}
-    }
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <section class="card" id="menuCard" aria-labelledby="menuTitle">
-      <div class="head">
-        <div class="title"><h1 id="menuTitle">Jedálny lístok</h1></div>
-        <time class="updated" id="menuUpdated" datetime="">Aktualizované — …</time>
-      </div>
-
-      <figure class="figure" id="menuFigure">
-        <!-- plná kvalita (originál) – nechaj zdroj tak ako máš v infra -->
-        <img id="menuImg" class="img" alt="Jedálny lístok" loading="lazy" decoding="async">
-      </figure>
-
-      <div class="actions">
-        <button class="btn btn-accent" id="zoomBtn" type="button">Zväčšiť</button>
-        <a class="btn" id="openFull" href="/assets/menu.jpg" target="_blank" rel="noopener">Otvoriť originál</a>
-      </div>
-    </section>
-  </main>
-
-  <!-- Lightbox -->
-  <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Zväčšený jedálny lístok">
-    <div class="lb-inner">
-      <button class="lb-close" id="lbClose" type="button">✕</button>
-      <img class="lb-img" id="lbImg" alt="">
+<!-- ===== JEDÁLNY LÍSTOK – VŠETKO V JEDNOM BLOKU ===== -->
+<section id="menu" data-page class="hide">
+  <div class="section-title">
+    <h2>Jedálny lístok</h2>
+    <div class="toolbar">
+      <time id="menuUpdated" class="muted tiny" datetime="">Aktualizované — …</time>
     </div>
   </div>
 
-  <script>
-    (function(){
-      const today = new Date().toISOString().slice(0,10);
+  <div class="card menu-card" id="menuCard" aria-labelledby="menuTitle">
+    <figure class="menu-figure" id="menuFigure">
+      <img id="menuImg" class="menu-img" alt="Jedálny lístok" loading="lazy" decoding="async">
+    </figure>
 
-      const img = document.getElementById('menuImg');
-      const fig = document.getElementById('menuFigure');
-      const updatedEl = document.getElementById('menuUpdated');
-      const openFull = document.getElementById('openFull');
-      const zoomBtn = document.getElementById('zoomBtn');
+    <div class="actions">
+      <button class="btn small" id="menuZoom" type="button">Zväčšiť</button>
+      <a class="btn ghost" id="menuOpenFull" href="/assets/menu.jpg" target="_blank" rel="noopener">Otvoriť originál</a>
+    </div>
+  </div>
+</section>
 
-      // 1) načítaj obrázok v PLNEJ kvalite (cache-buster podľa dňa)
-      const base = '/assets/menu.jpg';
-      img.src = base + '?v=' + today;
+<!-- Lightbox (modal) -->
+<div class="menu-lightbox" id="menuLightbox" role="dialog" aria-modal="true" aria-label="Zväčšený jedálny lístok">
+  <div class="menu-lightbox__inner">
+    <button class="menu-lightbox__close" id="menuLbClose" type="button">✕</button>
+    <div class="menu-viewport" id="menuViewport">
+      <img class="menu-full" id="menuFull" alt="">
+    </div>
+    <div class="menu-help muted tiny">Klik = +15 % • Alt/Right-click = −15 % • Koliesko = zoom • Ťah = posun • Esc = zavrieť</div>
+  </div>
+</div>
 
-      function markLoaded(){ fig.classList.add('loaded'); }
-      if (img.complete) markLoaded(); else img.addEventListener('load', markLoaded);
-      img.addEventListener('error', ()=>{ markLoaded(); img.alt = 'Nepodarilo sa načítať jedálny lístok.'; });
+<style>
+/* ===== Jedálny lístok – doplnkové štýly (scoped) ===== */
+.menu-card{ position:relative; will-change:transform;
+  transform:perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0);
+  transition:transform .22s cubic-bezier(.2,.6,.2,1), box-shadow .22s; }
+.menu-card::after{
+  content:""; position:absolute; inset:-1px; border-radius:var(--radius); pointer-events:none;
+  background:radial-gradient(320px 200px at calc(50% + var(--sheen-x,0px)) calc(50% + var(--sheen-y,0px)),
+    rgba(255,255,255,.10), rgba(255,255,255,0) 60%);
+  opacity:var(--sheen-opacity,0); mix-blend-mode:screen; transition:opacity .25s;
+}
+.menu-figure{ position:relative; overflow:hidden; border-radius:12px; background:#0f0f11; }
+.menu-img{ width:100%; height:auto; display:block; cursor:zoom-in; image-rendering:auto; }
 
-      // 2) aktualizácia z JSONu (ak CI ukladá aj čas)
-      fetch(base + '.json', { cache:'no-store' })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          const full = (data && data.img) ? data.img : base;
-          const dt   = new Date((data && data.fetchedAt) || Date.now());
-          updatedEl.dateTime = dt.toISOString();
-          updatedEl.textContent = 'Aktualizované — ' + dt.toLocaleString('sk-SK', { dateStyle:'medium', timeStyle:'short' });
-          // linky + lightbox zdroj
-          openFull.href = full + '?v=' + today;
-          img.dataset.full = full + '?v=' + today;
-        })
-        .catch(()=>{ img.dataset.full = base + '?v=' + today; });
+/* shimmer počas načítania */
+.menu-figure::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.08),rgba(255,255,255,0));
+  transform:translateX(-100%); animation:menuShimmer 1.1s infinite; pointer-events:none;
+}
+.menu-figure.loaded::after{ display:none; }
+@keyframes menuShimmer{ to{ transform:translateX(100%); } }
 
-      // 3) Lightbox (modal)
-      const lb = document.getElementById('lb');
-      const lbImg = document.getElementById('lbImg');
-      const lbClose = document.getElementById('lbClose');
+/* Modal (lightbox) */
+.menu-lightbox{ position:fixed; inset:0; display:none; place-items:center; z-index:51;
+  background:rgba(0,0,0,.76); backdrop-filter:blur(2px); }
+.menu-lightbox.open{ display:grid; }
+.menu-lightbox__inner{ position:relative; width:min(95vw,1200px); max-height:92vh;
+  display:grid; grid-template-rows: auto 1fr auto; gap:8px; }
+.menu-lightbox__close{ position:absolute; top:8px; right:8px; border:none; cursor:pointer;
+  border-radius:10px; padding:6px 10px; background:rgba(0,0,0,.45); color:#fff; font-weight:800; }
+.menu-lightbox__close:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 
-      function openLB(){
-        lbImg.src = img.dataset.full || img.src;
-        lb.classList.add('open');
-        lbClose.focus();
-      }
-      function closeLB(){
-        lb.classList.remove('open');
-        lbImg.src = '';
-      }
-      img.addEventListener('click', openLB);
-      zoomBtn.addEventListener('click', openLB);
-      lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
-      lbClose.addEventListener('click', closeLB);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('open')) closeLB(); });
+.menu-viewport{
+  position:relative; overflow:hidden; border-radius:16px; background:#0f0f11;
+  width:100%; height:min(80vh, calc(92vh - 40px)); touch-action:none; /* pre pekný pan/zoom */
+}
+.menu-full{
+  position:absolute; top:0; left:0; will-change:transform;
+  transform-origin:0 0; /* spravíme si vlastnú kotvu */
+  user-select:none; -webkit-user-drag:none; image-rendering:auto;
+}
+.menu-help{ text-align:center; }
 
-      // 4) Jemná 3D tilt animácia (myš + náklon zariadenia)
-      const card = document.getElementById('menuCard');
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+/* mobil: vycentruj akcie pod obrázkom */
+@media (max-width:640px){ .menu-card .actions{ justify-content:center; } }
+@media (prefers-reduced-motion:reduce){ .menu-card{transition:none} .menu-card::after{display:none} }
+</style>
 
-      if (card && !prefersReduced){
-        const MAX = 2.5;   // maximálny uhol v stupňoch (veľmi jemné)
-        const SHEEN = 8;   // odlesk v px
-        let rafId = 0, ox = 0, oy = 0, usingDO = false;
+<script>
+(function(){
+  /* ===== ZÁKLADNÉ PREMENNÉ ===== */
+  const today   = new Date().toISOString().slice(0,10);
+  const baseImg = '/assets/menu.jpg';
+  const metaUrl = baseImg + '.json';
 
-        // myš – desktop
-        function onMove(e){
-          if (usingDO) return; // device orientation má prednosť
-          const r = card.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width;   // 0..1
-          const py = (e.clientY - r.top)  / r.height;  // 0..1
-          applyTilt((px - .5) * (MAX*2), (0.5 - py) * (MAX*2), (px-.5)*SHEEN, (py-.5)*SHEEN, 1);
-        }
-        function reset(){
-          applyTilt(0,0,0,0,0);
-        }
-        function applyTilt(rx, ry, sx, sy, sheen){
-          cancelAnimationFrame(rafId);
-          rafId = requestAnimationFrame(()=>{
-            card.style.transform = `perspective(900px) rotateX(${ry.toFixed(2)}deg) rotateY(${rx.toFixed(2)}deg) translateZ(0)`;
-            card.style.setProperty('--sheen-x', `${sx.toFixed(1)}px`);
-            card.style.setProperty('--sheen-y', `${sy.toFixed(1)}px`);
-            card.style.setProperty('--sheen-opacity', sheen ? '1' : '0');
-          });
-        }
-        if (!isCoarse){ // iba na “presných” pointeroch
-          card.addEventListener('pointermove', onMove);
-          card.addEventListener('pointerleave', reset);
-        }
+  const img       = document.getElementById('menuImg');
+  const fig       = document.getElementById('menuFigure');
+  const updatedEl = document.getElementById('menuUpdated');
+  const openFull  = document.getElementById('menuOpenFull');
+  const zoomBtn   = document.getElementById('menuZoom');
 
-        // Device Orientation – jemný náklon mobilu (po súhlase)
-        let permissionAsked = false;
-        async function tryEnableDO(){
-          if (permissionAsked) return;
-          permissionAsked = true;
-          try{
-            if (typeof DeviceOrientationEvent !== 'undefined' &&
-                typeof DeviceOrientationEvent.requestPermission === 'function'){
-              const res = await DeviceOrientationEvent.requestPermission();
-              if (res !== 'granted') return;
-            }
-            window.addEventListener('deviceorientation', (ev)=>{
-              usingDO = true;
-              // beta ≈ pitch, gamma ≈ roll (v stupňoch) – osekaj na ±12 a zjemni
-              const gx = Math.max(-12, Math.min(12, ev.gamma  || 0)) / 12; // -1..1
-              const gy = Math.max(-12, Math.min(12, ev.beta   || 0)) / 12; // -1..1
-              const rx = gx * MAX;   // Y rotácia
-              const ry = -gy * MAX;  // X rotácia (invert)
-              applyTilt(rx, ry, gx*SHEEN, gy*SHEEN, 1);
-            }, { passive:true });
-          }catch(_){}
-        }
-        // Po prvom ťuknutí na kartu jemne požiadame o povolenie (iOS vyžaduje gesture)
-        card.addEventListener('click', tryEnableDO, { once:true });
-      }
-    })();
-  </script>
-</body>
-</html>
+  /* ===== NAČÍTANIE OBRÁZKA + METADÁTA ===== */
+  img.src = baseImg + '?v=' + today;
+  function markLoaded(){ fig.classList.add('loaded'); }
+  if (img.complete) markLoaded(); else img.addEventListener('load', markLoaded);
+  img.addEventListener('error', ()=>{ markLoaded(); img.alt = 'Nepodarilo sa načítať jedálny lístok.'; });
+
+  fetch(metaUrl, { cache:'no-store' })
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      const full = (d && d.img) ? d.img : baseImg;
+      const dt   = new Date((d && d.fetchedAt) || Date.now());
+      updatedEl.dateTime   = dt.toISOString();
+      updatedEl.textContent= 'Aktualizované — ' + dt.toLocaleString('sk-SK',{dateStyle:'medium', timeStyle:'short'});
+      openFull.href        = full + '?v=' + today;
+      img.dataset.full     = full + '?v=' + today;
+    })
+    .catch(()=>{ img.dataset.full = baseImg + '?v=' + today; });
+
+  /* ===== MODAL + ZOOM/DRAG ===== */
+  const lb       = document.getElementById('menuLightbox');
+  const lbImg    = document.getElementById('menuFull');
+  const lbClose  = document.getElementById('menuLbClose');
+  const viewport = document.getElementById('menuViewport');
+
+  // stav transformácie (scale + posun)
+  const state = { scale: 1, minScale: 1, maxScale: 8, tx: 0, ty: 0, vw: 0, vh: 0, iw: 0, ih: 0 };
+
+  function fitToScreen(){
+    // nastavíme tak, aby sa celý obrázok zmestil do viewportu (contain)
+    state.vw = viewport.clientWidth;
+    state.vh = viewport.clientHeight;
+    state.iw = lbImg.naturalWidth || lbImg.width;
+    state.ih = lbImg.naturalHeight|| lbImg.height;
+
+    const sx = state.vw / state.iw;
+    const sy = state.vh / state.ih;
+    state.minScale = Math.min(sx, sy);     // fit-contain
+    state.scale    = state.minScale;
+    state.tx = (state.vw - state.iw * state.scale) * 0.5; // centrovanie
+    state.ty = (state.vh - state.ih * state.scale) * 0.5;
+    applyTransform();
+  }
+
+  function applyTransform(){
+    lbImg.style.transform = `translate(${state.tx}px, ${state.ty}px) scale(${state.scale})`;
+  }
+
+  // výpočet zoomu „na bod“ – aby kliknutý bod zostal na rovnakom mieste
+  function zoomAt(cx, cy, factor){
+    const newScale = Math.min(state.maxScale, Math.max(state.minScale, state.scale * factor));
+    const k = newScale / state.scale;
+    if (newScale === state.scale) return;
+
+    // súradnice obrázka v obsahových jednotkách
+    const imgX = (cx - state.tx) / state.scale;
+    const imgY = (cy - state.ty) / state.scale;
+
+    // nový posun tak, aby bod ostal fixovaný pod kurzorom
+    state.tx = cx - imgX * newScale;
+    state.ty = cy - imgY * newScale;
+    state.scale = newScale;
+    clampPan();
+    applyTransform();
+  }
+
+  function clampPan(){
+    // nech nedovolíme „utiecť“ obrázku ďaleko pri veľkom zoome
+    const w = state.iw * state.scale;
+    const h = state.ih * state.scale;
+
+    const minTx = Math.min(0, state.vw - w);
+    const maxTx = Math.max(0, state.vw - w);
+    const minTy = Math.min(0, state.vh - h);
+    const maxTy = Math.max(0, state.vh - h);
+
+    // ak je obrázok menší ako viewport – centrovať
+    state.tx = (w < state.vw) ? (state.vw - w) * 0.5 : Math.min(0, Math.max(minTx, state.tx));
+    state.ty = (h < state.vh) ? (state.vh - h) * 0.5 : Math.min(0, Math.max(minTy, state.ty));
+  }
+
+  function openLB(){
+    lbImg.src = img.dataset.full || img.src;
+    lb.classList.add('open');
+    lbClose.focus();
+
+    // Po načítaní originálu prispôsob view
+    if (lbImg.complete) { fitToScreen(); }
+    else lbImg.onload = fitToScreen;
+  }
+  function closeLB(){
+    lb.classList.remove('open');
+    lbImg.src = '';
+  }
+
+  // klik v náhľade otvára modal
+  img.addEventListener('click', openLB);
+  document.getElementById('menuZoom').addEventListener('click', openLB);
+  lb.addEventListener('click', e=>{ if (e.target === lb) closeLB(); });
+  lbClose.addEventListener('click', closeLB);
+  document.addEventListener('keydown', e=>{ if (e.key === 'Escape' && lb.classList.contains('open')) closeLB(); });
+
+  // zoom interakcie v modale
+  const Z = 1.15; // 15 %
+  viewport.addEventListener('click', e=>{
+    // Alt/Right-click = zoom out, inak zoom in
+    const factor = (e.altKey || e.button===2) ? (1/Z) : Z;
+    zoomAt(e.clientX - viewport.getBoundingClientRect().left,
+           e.clientY - viewport.getBoundingClientRect().top, factor);
+  });
+  // potlač context menu (kvôli right-click zoom out)
+  viewport.addEventListener('contextmenu', e=>e.preventDefault());
+
+  // koliesko = zoom (s „na bod“)
+  viewport.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const factor = (e.deltaY > 0) ? (1/Z) : Z;
+    zoomAt(e.clientX - viewport.getBoundingClientRect().left,
+           e.clientY - viewport.getBoundingClientRect().top, factor);
+  }, { passive:false });
+
+  // pan (ťahanie) keď je priblížené
+  let panning = false, sx=0, sy=0, startTx=0, startTy=0;
+  function startPan(x,y){ panning=true; sx=x; sy=y; startTx=state.tx; startTy=state.ty; }
+  function movePan(x,y){
+    if(!panning) return;
+    state.tx = startTx + (x - sx);
+    state.ty = startTy + (y - sy);
+    clampPan(); applyTransform();
+  }
+  function endPan(){ panning=false; }
+
+  // myš
+  viewport.addEventListener('mousedown', e=>{ startPan(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', e=>movePan(e.clientX, e.clientY));
+  window.addEventListener('mouseup', endPan);
+
+  // dotyk
+  viewport.addEventListener('pointerdown', e=>{ viewport.setPointerCapture(e.pointerId); startPan(e.clientX, e.clientY); });
+  viewport.addEventListener('pointermove', e=>movePan(e.clientX, e.clientY));
+  viewport.addEventListener('pointerup',   endPan);
+  viewport.addEventListener('pointercancel', endPan);
+  window.addEventListener('resize', ()=>{ if(lb.classList.contains('open')) fitToScreen(); });
+
+  /* ===== Jemný tilt na desktope (znížený) ===== */
+  const card = document.getElementById('menuCard');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isCoarse       = window.matchMedia('(pointer: coarse)').matches;
+  if (card && !prefersReduced && !isCoarse){
+    const MAX = 1.1;  // mierne
+    const SHEEN = 6;
+    let rafId = 0;
+    function applyTilt(rx,ry,sx,sy,show){
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(()=>{
+        card.style.transform = `perspective(900px) rotateX(${ry.toFixed(2)}deg) rotateY(${rx.toFixed(2)}deg) translateZ(0)`;
+        card.style.setProperty('--sheen-x', `${sx.toFixed(1)}px`);
+        card.style.setProperty('--sheen-y', `${sy.toFixed(1)}px`);
+        card.style.setProperty('--sheen-opacity', show ? '1' : '0');
+      });
+    }
+    function resetTilt(){ applyTilt(0,0,0,0,0); }
+    card.addEventListener('pointermove', e=>{
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top)  / r.height;
+      applyTilt((px-.5)*(MAX*2), (0.5-py)*(MAX*2), (px-.5)*SHEEN, (py-.5)*SHEEN, 1);
+    });
+    card.addEventListener('pointerleave', resetTilt);
+  }
+})();
+</script>
