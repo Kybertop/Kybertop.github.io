@@ -26,7 +26,7 @@
 
     .wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
 
-    /* === Card (rovnaký štýl) === */
+    /* === Card (jednotný štýl) === */
     .card{
       width:min(1000px,94vw); margin:clamp(16px,4vw,40px) auto; padding:18px 18px 22px;
       background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 120%),var(--surface);
@@ -47,7 +47,7 @@
     .title h1{font-size:clamp(20px,3.2vw,26px);margin:0}
     .updated{color:var(--muted);font-weight:600}
 
-    /* image area + shimmer */
+    /* image + shimmer */
     .figure{position:relative;overflow:hidden;border-radius:calc(var(--radius) - 8px);background:#0f0f11}
     .img{width:100%;height:auto;display:block;cursor:zoom-in;image-rendering:auto}
     .figure::after{
@@ -63,7 +63,7 @@
     .btn:hover{border-color:var(--accent)}
     .btn-accent{border-color:color-mix(in oklab, var(--accent) 60%, transparent);color:var(--accent)}
 
-    /* jemný sheen/tilt (zjemnené) */
+    /* jemný sheen/tilt */
     .card::after{
       content:""; position:absolute; inset:-1px; border-radius:var(--radius); pointer-events:none;
       background:radial-gradient(320px 200px at calc(50% + var(--sheen-x,0px)) calc(50% + var(--sheen-y,0px)),
@@ -71,15 +71,36 @@
       opacity: var(--sheen-opacity,0); mix-blend-mode:screen; transition:opacity .25s;
     }
 
-    /* === Lightbox (rovnaký vizuál) + overflow pre zoom === */
+    /* === Lightbox (bez „black barov“) === */
     .lightbox{position:fixed;inset:0;display:none;place-items:center;z-index:50;background:rgba(0,0,0,.76);backdrop-filter:blur(2px)}
     .lightbox.open{display:grid}
-    .lb-inner{position:relative;width:min(95vw,1200px);max-height:92vh;overflow:hidden}
-    .lb-img{width:100%;height:auto;max-height:92vh;display:block;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.55);animation:lbIn .16s ease-out;
-      will-change:transform; transform-origin:0 0; /* pre wheel-zoom */ }
+    .lb-inner{
+      position:relative;
+      width:min(95vw,1200px);
+      max-height:92vh;
+      overflow:hidden;         /* skry panovanie mimo rám */
+      display:grid;place-items:center;
+    }
+    .lb-img{
+      display:block;
+      max-width:none; max-height:none; /* vlastné fitovanie robíme sami */
+      border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.55);
+      will-change:transform;
+      transform-origin:0 0;             /* pre zoom okolo kurzora */
+      cursor:grab;
+      image-rendering:auto;
+      animation:lbIn .16s ease-out;
+    }
+    .lb-img.grabbing{ cursor:grabbing; }
     @keyframes lbIn{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
     .lb-close{position:absolute;top:8px;right:8px;border:none;cursor:pointer;border-radius:10px;padding:6px 10px;background:rgba(0,0,0,.45);color:#fff;font-weight:800}
     .lb-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+    .lb-hint{
+      position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
+      font-size:12px;color:#e2e2e6; opacity:.8; background:rgba(0,0,0,.35);
+      padding:6px 10px;border-radius:999px; pointer-events:none; user-select:none;
+    }
 
     /* Mobile */
     @media (max-width:640px){
@@ -87,6 +108,7 @@
       .title h1{font-size:1.06rem}
       .updated{font-size:.9rem}
       .actions{justify-content:center}
+      .lb-hint{font-size:11px}
     }
     @media (prefers-reduced-motion:reduce){
       .card{transition:none}
@@ -103,12 +125,10 @@
       </div>
 
       <figure class="figure" id="menuFigure">
-        <!-- náhľad/ten istý zdroj – plná kvalita s cache-busterom -->
         <img id="menuImg" class="img" alt="Jedálny lístok" loading="lazy" decoding="async">
       </figure>
 
       <div class="actions">
-        <button class="btn btn-accent" id="zoomBtn" type="button">Zväčšiť</button>
         <a class="btn" id="openFull" href="/assets/menu.jpg" target="_blank" rel="noopener">Otvoriť originál</a>
       </div>
     </section>
@@ -119,33 +139,32 @@
     <div class="lb-inner" id="lbViewport">
       <button class="lb-close" id="lbClose" type="button">✕</button>
       <img class="lb-img" id="lbImg" alt="">
+      <div class="lb-hint">Kolieskom priblíženie • Ťahaním posun</div>
     </div>
   </div>
 
   <script>
     (function(){
       const today = new Date().toISOString().slice(0,10);
+      const base  = '/assets/menu.jpg';
 
+      // DOM
       const img = document.getElementById('menuImg');
       const fig = document.getElementById('menuFigure');
       const updatedEl = document.getElementById('menuUpdated');
       const openFull = document.getElementById('openFull');
-      const zoomBtn = document.getElementById('zoomBtn');
 
-      // 1) načítaj obrázok v PLNEJ kvalite (cache-buster podľa dňa)
-      const base = '/assets/menu.jpg';
+      // načítanie
       img.src = base + '?v=' + today;
-
       function markLoaded(){ fig.classList.add('loaded'); }
       if (img.complete) markLoaded(); else img.addEventListener('load', markLoaded);
-      img.addEventListener('error', ()=>{ markLoaded(); img.alt = 'Nepodarilo sa načítať jedálny lístok.'; });
+      img.addEventListener('error', ()=>{ markLoaded(); img.alt='Nepodarilo sa načítať jedálny lístok.'; });
 
-      // 2) aktualizácia z JSONu (ak CI ukladá aj čas)
       fetch(base + '.json', { cache:'no-store' })
         .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          const full = (data && data.img) ? data.img : base;
-          const dt   = new Date((data && data.fetchedAt) || Date.now());
+        .then(d=>{
+          const full = (d && d.img) || base;
+          const dt   = new Date((d && d.fetchedAt) || Date.now());
           updatedEl.dateTime = dt.toISOString();
           updatedEl.textContent = 'Aktualizované — ' + dt.toLocaleString('sk-SK', { dateStyle:'medium', timeStyle:'short' });
           openFull.href = full + '?v=' + today;
@@ -153,12 +172,34 @@
         })
         .catch(()=>{ img.dataset.full = base + '?v=' + today; });
 
-      // 3) Lightbox (modal)
-      const lb = document.getElementById('lb');
-      const lbImg = document.getElementById('lbImg');
-      const lbClose = document.getElementById('lbClose');
+      // Lightbox + zoom & drag
+      const lb       = document.getElementById('lb');
+      const lbImg    = document.getElementById('lbImg');
+      const lbClose  = document.getElementById('lbClose');
       const viewport = document.getElementById('lbViewport');
 
+      const S = { scale:1, min:1, max:8, tx:0, ty:0, vw:0, vh:0, iw:0, ih:0 };
+      let dragging = false, sx=0, sy=0, ox=0, oy=0;
+
+      function fitToViewport(){
+        S.vw = viewport.clientWidth;
+        S.vh = viewport.clientHeight;
+        S.iw = lbImg.naturalWidth  || lbImg.width;
+        S.ih = lbImg.naturalHeight || lbImg.height;
+
+        // „contain“ fit (bez barov vnútri kontajnera)
+        const sx = S.vw / S.iw, sy = S.vh / S.ih;
+        S.min   = Math.min(sx, sy);
+        S.scale = S.min;
+
+        // centrovanie
+        S.tx = (S.vw - S.iw * S.scale) * 0.5;
+        S.ty = (S.vh - S.ih * S.scale) * 0.5;
+        apply();
+      }
+      function apply(){
+        lbImg.style.transform = `translate(${S.tx}px, ${S.ty}px) scale(${S.scale})`;
+      }
       function openLB(){
         lbImg.src = img.dataset.full || img.src;
         lb.classList.add('open');
@@ -170,43 +211,66 @@
         lb.classList.remove('open');
         lbImg.src = '';
       }
+
+      // wheel zoom (okolo kurzora)
+      const STEP = 1.15;
+      function zoomAt(x, y, factor){
+        const ns = Math.min(S.max, Math.max(S.min, S.scale * factor));
+        if (ns === S.scale) return;
+
+        // bod v obrázku pod kurzorom (pred zmenou scale)
+        const imgX = (x - S.tx) / S.scale;
+        const imgY = (y - S.ty) / S.scale;
+
+        // nový posun tak, aby NEMENIL bod pod kurzorom
+        S.tx = x - imgX * ns;
+        S.ty = y - imgY * ns;
+
+        // ak ideš naspäť na fit, znova presne na stred a žiadne posúvanie
+        if (ns <= S.min){
+          fitToViewport();
+          return;
+        }
+        S.scale = ns;
+        clampTranslate();
+        apply();
+      }
+
+      function clampTranslate(){
+        // nech obrázok neodíde úplne mimo viewport
+        const w = S.iw * S.scale, h = S.ih * S.scale;
+        const minX = Math.min(0, S.vw - w), maxX = Math.max(0, S.vw - w);
+        const minY = Math.min(0, S.vh - h), maxY = Math.max(0, S.vh - h);
+        S.tx = Math.min(maxX, Math.max(minX, S.tx));
+        S.ty = Math.min(maxY, Math.max(minY, S.ty));
+      }
+
+      // drag
+      function onDown(e){
+        if (S.scale <= S.min) return; // pri fit nepohybujeme
+        dragging = true; lbImg.classList.add('grabbing');
+        sx = e.clientX; sy = e.clientY; ox = S.tx; oy = S.ty;
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp, { once:true });
+      }
+      function onMove(e){
+        if (!dragging) return;
+        S.tx = ox + (e.clientX - sx);
+        S.ty = oy + (e.clientY - sy);
+        clampTranslate();
+        apply();
+      }
+      function onUp(){
+        dragging = false; lbImg.classList.remove('grabbing');
+        window.removeEventListener('pointermove', onMove);
+      }
+
+      // events
       img.addEventListener('click', openLB);
-      zoomBtn.addEventListener('click', openLB);
       lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
       lbClose.addEventListener('click', closeLB);
       document.addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('open')) closeLB(); });
 
-      // 4) Wheel-zoom okolo kurzora (bez panovania)
-      const S = { scale:1, min:1, max:8, tx:0, ty:0, vw:0, vh:0, iw:0, ih:0 };
-      function fitToViewport(){
-        S.vw = viewport.clientWidth;  S.vh = viewport.clientHeight;
-        S.iw = lbImg.naturalWidth  || lbImg.width;
-        S.ih = lbImg.naturalHeight || lbImg.height;
-        const sx = S.vw / S.iw, sy = S.vh / S.ih;
-        S.min = Math.min(sx, sy);
-        S.scale = S.min;
-        // centrovanie
-        S.tx = (S.vw - S.iw * S.scale) * 0.5;
-        S.ty = (S.vh - S.ih * S.scale) * 0.5;
-        apply();
-      }
-      function apply(){
-        lbImg.style.transform = `translate(${S.tx}px, ${S.ty}px) scale(${S.scale})`;
-      }
-      function zoomAt(x, y, factor){
-        const ns = Math.min(S.max, Math.max(S.min, S.scale * factor));
-        if (ns === S.scale) return;
-        const imgX = (x - S.tx) / S.scale;
-        const imgY = (y - S.ty) / S.scale;
-        S.tx = x - imgX * ns;
-        S.ty = y - imgY * ns;
-        // keď je menší než fit, vrátime na stred (žiadne panovanie)
-        if (ns <= S.min){ fitToViewport(); return; }
-        S.scale = ns;
-        apply();
-      }
-
-      const STEP = 1.15; // ±15 %
       viewport.addEventListener('wheel', e=>{
         e.preventDefault();
         const r = viewport.getBoundingClientRect();
@@ -214,16 +278,16 @@
         zoomAt(x, y, e.deltaY > 0 ? 1/STEP : STEP);
       }, { passive:false });
 
+      lbImg.addEventListener('pointerdown', onDown);
+
       window.addEventListener('resize', ()=>{ if(lb.classList.contains('open')) fitToViewport(); });
 
-      // 5) Jemná 3D tilt animácia – zjemnené
+      // jemný tilt na karte (zjemnené)
       const card = document.getElementById('menuCard');
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const isCoarse = window.matchMedia('(pointer: coarse)').matches;
       if (card && !prefersReduced && !isCoarse){
-        const MAX = 1.1;   // znížené
-        const SHEEN = 6;
-        let rafId = 0;
+        const MAX = 1.1, SHEEN = 6; let rafId = 0;
         function applyTilt(rx, ry, sx, sy, sheen){
           cancelAnimationFrame(rafId);
           rafId = requestAnimationFrame(()=>{
