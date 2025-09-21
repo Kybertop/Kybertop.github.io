@@ -169,8 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cls = uClass?.value || ''; const wh = WEBHOOKS[cls];
     if(!cls || !wh){ e.preventDefault(); alert('Vyber triedu (alebo chýba webhook).'); return; }
 
-    // odosielame priamo na webhook, ale s wait=true nech sa stránka pri refreshe nepýta na resend
-    form.action = 'https://energo-relay.kybertop505.workers.dev/';
+    form.action = '/relay';
 
     const now = new Date();
     const dateStr = now.toLocaleString('sk-SK', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
@@ -179,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const surname = (uSurname?.value || '').trim();
     const note = (uNote?.value || '').trim();
 
-    // === Správa s emoji ===
     const content = `🎓 Žiak: **${name} ${surname}** (${cls})
 📅 Dátum: ${dateStr}${note ? `
 📝 Poznámka: ${note}` : ''}`;
@@ -187,14 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const filename = (uFile && uFile.files && uFile.files[0] && uFile.files[0].name)
       ? uFile.files[0].name : 'subor';
 
-    // payload_json pre Discord (názov bota + obsah + názov prílohy)
     if (payload) payload.value = JSON.stringify({
       username: BOT_NAME,
       content,
       attachments: [{ id: 0, filename }]
     });
 
-    // niektoré klienty potrebujú aj "content" priamo vo forme
     let contentField = $('#contentField');
     if (!contentField && form) {
       contentField = document.createElement('input');
@@ -203,11 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (contentField) contentField.value = content;
 
-    // vyčistenie iframe po odoslaní
     const frame = $('#uploadTarget');
     frame?.addEventListener('load', () => { setTimeout(() => { frame.src = 'about:blank'; }, 200); }, { once:true });
 
-    // UX – zavri modal a vyčisti polia
     setTimeout(()=>{
       dialog?.close();
       if (uClass) uClass.value=''; if (uName) uName.value=''; if (uSurname) uSurname.value=''; if (uNote) uNote.value='';
