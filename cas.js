@@ -51,7 +51,6 @@
 
   const bwTime = document.getElementById('bwTime');
 
-  // formatéry času (lokalizované, ale potrebujeme aj prácu s minútami)
   const fmtClock = new Intl.DateTimeFormat('sk-SK', {
     timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
