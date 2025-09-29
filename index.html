@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pato - Minister Záhad & Tajomstiev</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.8s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full">
+            <div class="text-center mb-16 animate-fade-in">
+                <div class="mb-8 relative inline-block">
+                    <div class="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto mb-6 transform transition-transform hover:scale-105 duration-300 overflow-hidden border-2 border-white border-opacity-20 bg-white">
+                        <img 
+                            src="https://i.imgur.com/KEfve4E.jpeg"
+                            alt="Pato"
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+                
+                <h1 class="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
+                    Pato
+                </h1>
+                
+                <div class="h-1 w-20 bg-white mx-auto mb-6"></div>
+                
+                <p class="text-gray-400 text-lg md:text-xl mb-2">
+                    Minister Záhad & Tajomstiev
+                </p>
+                
+                <p class="text-gray-500 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                    Strážim všetky záhady a tajomstvá tohto sveta.
+                    Niektoré veci je lepšie nechať skryté.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <a href="https://instagram.com/kybertop" target="_blank" rel="noopener noreferrer"
+                   class="group relative flex items-center gap-3 px-6 py-4 bg-white bg-opacity-5 rounded-lg border border-gray-800 transition-all duration-300 hover:bg-gray-800 hover:border-white">
+                    <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                    </svg>
+                    <span class="font-medium">Instagram</span>
+                </a>
+
+                <a href="https://discord.com/invite/mtnjZ6vqsE" target="_blank" rel="noopener noreferrer"
+                   class="group relative flex items-center gap-3 px-6 py-4 bg-white bg-opacity-5 rounded-lg border border-gray-800 transition-all duration-300 hover:bg-gray-800 hover:border-white">
+                    <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="font-medium">Discord</span>
+                </a>
+
+                <a href="mailto:pato@hesko.cc"
+                   class="group relative flex items-center gap-3 px-6 py-4 bg-white bg-opacity-5 rounded-lg border border-gray-800 transition-all duration-300 hover:bg-gray-800 hover:border-white">
+                    <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect width="20" height="16" x="2" y="4" rx="2"/>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    <span class="font-medium">Email</span>
+                </a>
+
+                <a href="/energo"
+                   class="group relative flex items-center gap-3 px-6 py-4 bg-white bg-opacity-5 rounded-lg border border-gray-800 transition-all duration-300 hover:bg-green-900 hover:border-white">
+                    <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="font-medium">Energo</span>
+                </a>
+            </div>
+
+            <div class="bg-white bg-opacity-5 rounded-xl p-8 md:p-10 border border-gray-800 backdrop-blur-sm">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <span class="w-2 h-8 bg-white"></span>
+                    O Mne
+                </h2>
+                <p class="text-gray-400 leading-relaxed mb-4">
+                    Venujem sa rôznorodým činnostiam, ktoré zostávajú v utajení. 
+                    Ako Minister Záhad a Minister Tajomstiev mám na starosti veci, 
+                    o ktorých sa nesmie hovoriť.
+                </p>
+                <p class="text-gray-400 leading-relaxed">
+                    Niektoré tajomstvá sú príliš mocné na to, aby boli odhalené. 
+                    Ale možno, len možno... raz sa dozvieš viac.
+                </p>
+            </div>
+
+            <div class="text-center mt-12 text-gray-600 text-sm">
+                <p>© 2025 Pato. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
