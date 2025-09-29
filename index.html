@@ -40,7 +40,8 @@
                 <div class="mb-8 relative inline-block">
                     <div class="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto mb-6 transform transition-transform hover:scale-105 duration-300 overflow-hidden border-2 border-white border-opacity-20 bg-white">
                         <img 
-                            src="https://i.imgur.com/KEfve4E.jpeg"
+                            id="randomAvatar"
+                            src=""
                             alt="Pato"
                             class="w-full h-full object-cover"
                         />
@@ -122,5 +123,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Pole s URL adresami obrázkov
+        const avatarImages = [
+            'https://i.imgur.com/KEfve4E.jpeg',
+            'https://i.imgur.com/I0y4c4j.png',
+            'https://i.imgur.com/IxvXDIV.png'
+        ];
+
+        // Náhodný výber obrázka
+        const randomIndex = Math.floor(Math.random() * avatarImages.length);
+        const selectedImage = avatarImages[randomIndex];
+
+        // Nastavenie obrázka
+        document.getElementById('randomAvatar').src = selectedImage;
+    </script>
 </body>
 </html>
