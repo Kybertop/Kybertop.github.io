@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Energy Tier List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .lightning {
+            width: 48px;
+            height: 48px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        h1 {
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .divider {
+            height: 4px;
+            width: 128px;
+            margin: 24px auto 0;
+            background: linear-gradient(to right, transparent, white, transparent);
+        }
+
+        .tier-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tier-row {
+            background-color: #000;
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='white' stroke-width='1' stroke-dasharray='8%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+            border-radius: 8px;
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .tier-row:hover {
+            opacity: 0.9;
+        }
+
+        .tier-content {
+            display: flex;
+        }
+
+        .tier-label {
+            width: 128px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tier-label::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .tier-label-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .crown {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 8px;
+        }
+
+        .tier-letter {
+            font-size: 48px;
+            font-weight: 900;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+        }
+
+        .tier-name {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        .tier-s { background: linear-gradient(to bottom right, #facc15, #ca8a04); }
+        .tier-a { background: linear-gradient(to bottom right, #ef4444, #b91c1c); }
+        .tier-b { background: linear-gradient(to bottom right, #fb923c, #ea580c); }
+        .tier-c { background: linear-gradient(to bottom right, #4ade80, #16a34a); }
+        .tier-d { background: linear-gradient(to bottom right, #52525b, #27272a); }
+        .tier-f { background: linear-gradient(to bottom right, #3f3f46, #18181b); }
+
+        .tier-items {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .monster-item {
+            background: #fff;
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 2px solid #27272a;
+        }
+
+        .monster-item:hover {
+            background: #e5e5e5;
+            transform: scale(1.05);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: #525252;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            .tier-content {
+                flex-direction: column;
+            }
+
+            .tier-label {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <svg class="lightning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <h1>MONSTER ENERGY</h1>
+                <svg class="lightning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <p class="subtitle">Tier List Hodnotenie</p>
+            <div class="divider"></div>
+        </div>
+
+        <!-- Tier List -->
+        <div class="tier-list">
+            <!-- S Tier -->
+            <div class="tier-row">
+                <div class="tier-content">
+                    <div class="tier-label tier-s">
+                        <div class="tier-label-content">
+                            <svg class="crown" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                            </svg>
+                            <div class="tier-letter">S</div>
+                            <div class="tier-name">God Tier</div>
+                        </div>
+                    </div>
+                    <div class="tier-items">
+                        <div class="monster-item">Biely Monster</div>
+                        <div class="monster-item">Bad Apple</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A Tier -->
+            <div class="tier-row">
+                <div class="tier-content">
+                    <div class="tier-label tier-a">
+                        <div class="tier-label-content">
+                            <div class="tier-letter">A</div>
+                            <div class="tier-name">Vynikajúce</div>
+                        </div>
+                    </div>
+                    <div class="tier-items">
+                        <div class="monster-item">Klasický Monster</div>
+                        <div class="monster-item">Mango Loco</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B Tier -->
+            <div class="tier-row">
+                <div class="tier-content">
+                    <div class="tier-label tier-b">
+                        <div class="tier-label-content">
+                            <div class="tier-letter">B</div>
+                            <div class="tier-name">Veľmi dobré</div>
+                        </div>
+                    </div>
+                    <div class="tier-items">
+                        <div class="monster-item">Lando</div>
+                        <div class="monster-item">Klasický Zero</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C Tier -->
+            <div class="tier-row">
+                <div class="tier-content">
+                    <div class="tier-label tier-c">
+                        <div class="tier-label-content">
+                            <div class="tier-letter">C</div>
+                            <div class="tier-name">Priemerné</div>
+                        </div>
+                    </div>
+                    <div class="tier-items">
+                        <div class="monster-item">Rio Punch</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- D Tier -->
+            <div class="tier-row">
+                <div class="tier-content">
+                    <div class="tier-label tier-d">
+                        <div class="tier-label-content">
+                            <div class="tier-letter">D</div>
+                            <div class="tier-name">Podpriemerné</div>
+                        </div>
+                    </div>
+                    <div class="tier-items">
+                        <div class="monster-item">Hamilton</div>
+                        <div class="monster-item">Doctor</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- F Tier -->
+            <div class="tier-row">
+                <div class="tier-content">
+                    <div class="tier-label tier-f">
+                        <div class="tier-label-content">
+                            <div class="tier-letter">F</div>
+                            <div class="tier-name">Nechutí mi</div>
+                        </div>
+                    </div>
+                    <div class="tier-items">
+                        <div class="monster-item">Punch</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Unleash the Beast</p>
+        </div>
+    </div>
+</body>
+</html>
