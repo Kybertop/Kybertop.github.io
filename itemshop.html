@@ -137,8 +137,8 @@
       height:200px;
       object-fit:contain;
       border-radius:10px;
-      margin-bottom:12px;
       background:#0a0a0a;
+      box-shadow:inset 0 0 0 10px #0a0a0a;
     }
 
     .item-name {
@@ -163,7 +163,8 @@
     .item-price {
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      justify-content:center;
+      gap:4px;
       padding:6px 12px;
       border-radius:999px;
       border:1px solid var(--accent);
@@ -171,6 +172,13 @@
       font-weight:800;
       font-size:14px;
       color:white;
+      line-height:1;
+    }
+
+    .item-price img {
+      width:25px;
+      height:35px;
+      background-color:#0000;
     }
 
     /* Rarity borders */
@@ -224,6 +232,9 @@
       'banner': 'Banners',
       'toy': 'Toys',
       'pet': 'Pets',
+      'sidekick': 'Sidekicks',
+      'shoes': 'Shoes',
+      'kicks': 'Kicks',
       'itemwrap': 'Item Wraps',
       'bundle': 'Bundles',
       'aura': 'Auras',
@@ -246,6 +257,9 @@
       // Odstráň množstvo (1x, 2x, atď.) na začiatku
       name = name.replace(/^\d+x\s+/i, '');
       
+      // Odstráň "1 x Názov" pattern (s medzerou)
+      name = name.replace(/^\d+\s+x\s+/i, '');
+      
       // Odstráň "for X MtxCurrency" alebo "for X V-Bucks"
       name = name.replace(/\s+for\s+\d+\s+MtxCurrency/gi, '');
       name = name.replace(/\s+for\s+\d+\s+V-Bucks/gi, '');
@@ -254,6 +268,96 @@
       name = name.replace(/\s+Bundle\s+Bundle$/i, ' Bundle');
       
       return name.trim();
+    }
+
+    function extractSetName(item) {
+      // Odstránime type suffixes ako "Outfit", "Back Bling", "Pickaxe" atď.
+      let name = item.name;
+      
+      // Remove common type suffixes
+      name = name.replace(/\s+(Outfit|Skin|Back Bling|Pickaxe|Glider|Wrap|Bundle)$/i, '');
+      
+      // Remove 's at the end (possessive)
+      name = name.replace(/'s$/i, '');
+      
+      return name.trim();
+    }
+
+    function groupItemsIntoSets(groupedItems, allEntries) {
+      const sets = {};
+      const collections = {}; // Pre kolekcie z layout
+      const itemsInSets = new Set();
+      const itemsInCollections = new Set();
+      
+      // Najprv zoskupíme podľa kolekcií (layout)
+      allEntries.forEach((entry, entryIndex) => {
+        if (entry.layout && entry.layout.id && entry.layout.name) {
+          const collectionId = entry.layout.id;
+          const collectionName = entry.layout.name;
+          
+          if (!collections[collectionId]) {
+            collections[collectionId] = {
+              name: collectionName,
+              items: []
+            };
+          }
+          
+          // Označíme že tento entry patrí do kolekcie
+          collections[collectionId].items.push({
+            entryIndex: entryIndex,
+            entry: entry
+          });
+        }
+      });
+      
+      // Prejdeme všetky typy pre Sets (manuálne zoskupovanie podľa názvu)
+      const typesToCheck = ['outfit', 'backpack', 'pickaxe', 'glider', 'wrap', 'sidekick', 'shoes', 'kicks'];
+      
+      typesToCheck.forEach(type => {
+        if (!groupedItems[type]) return;
+        
+        groupedItems[type].forEach((item, index) => {
+          const setName = extractSetName(item);
+          
+          // Hľadáme matching items v iných kategóriách
+          let matchingItems = [{...item, type: type, originalIndex: index}];
+          
+          typesToCheck.forEach(otherType => {
+            if (otherType === type || !groupedItems[otherType]) return;
+            
+            groupedItems[otherType].forEach((otherItem, otherIndex) => {
+              const otherSetName = extractSetName(otherItem);
+              
+              // Ak sa názvy zhodujú (case insensitive)
+              if (setName.toLowerCase() === otherSetName.toLowerCase() && setName.length > 3) {
+                matchingItems.push({...otherItem, type: otherType, originalIndex: otherIndex});
+                itemsInSets.add(`${otherType}-${otherIndex}`);
+              }
+            });
+          });
+          
+          // Ak máme 2+ matching items, vytvoríme set
+          if (matchingItems.length >= 2) {
+            itemsInSets.add(`${type}-${index}`);
+            
+            if (!sets[setName]) {
+              sets[setName] = matchingItems;
+            } else {
+              // Merge items if set already exists
+              matchingItems.forEach(newItem => {
+                const exists = sets[setName].some(existing => 
+                  existing.type === newItem.type && existing.name === newItem.name
+                );
+                if (!exists) {
+                  sets[setName].push(newItem);
+                }
+              });
+            }
+          }
+        });
+      });
+      
+      return { sets, itemsInSets, collections };
     }
 
     async function loadData() {
@@ -308,8 +412,10 @@
         }
 
         const groupedItems = {};
+        const itemsWithMetadata = []; // Uchováme aj metadata pre kolekcie
+        const itemsInBundles = new Set(); // Track itemov ktoré sú v bundloch
 
-        shopEntries.forEach(entry => {
+        shopEntries.forEach((entry, entryIndex) => {
           let name = "Neznamy item";
           let image = "https://fortnite-api.com/images/vbucks.png";
           let price = entry.finalPrice || "???";
@@ -332,6 +438,15 @@
             image = entry.bundle.image || image;
             type = "bundle";
             console.log("Found bundle:", name, type);
+            
+            // Označíme všetky itemy v bundle ako súčasť bundle
+            if (entry.bundle.items && entry.bundle.items.length > 0) {
+              entry.bundle.items.forEach(bundleItem => {
+                if (bundleItem.id) {
+                  itemsInBundles.add(bundleItem.id);
+                }
+              });
+            }
           } else {
             // Skúsime rôzne spôsoby získania ID
             let itemId = entry.items?.[0]?.id || 
@@ -383,31 +498,111 @@
             groupedItems[type] = [];
           }
           
-          groupedItems[type].push({
+          const itemData = {
             name: name,
             image: image,
             price: price,
             artist: artist,
-            rarity: rarity
-          });
+            rarity: rarity,
+            entryIndex: entryIndex,
+            layoutId: entry.layout?.id,
+            layoutName: entry.layout?.name,
+            itemId: entry.items?.[0]?.id || entry.brItems?.[0]?.id || entry.offerId
+          };
+          
+          groupedItems[type].push(itemData);
+          itemsWithMetadata.push({...itemData, type: type, entry: entry});
         });
 
-        const typeOrder = ['outfit', 'backpack', 'pickaxe', 'glider', 'wrap', 'emote', 'emoji', 'spray', 'loadingscreen', 'contrail', 'music', 'banner', 'toy', 'pet', 'itemwrap', 'aura', 'guitar', 'bass', 'drum', 'microphone', 'keytar', 'bundle', 'other', 'tracks'];
+        // Najprv zoskupíme items do setov a kolekcií
+        const { sets, itemsInSets, collections } = groupItemsIntoSets(groupedItems, shopEntries);
 
-        typeOrder.forEach(type => {
-          if (groupedItems[type] && groupedItems[type].length > 0) {
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'group';
+        // Renderuj Collections sekciu ak existujú kolekcie s 2+ itemami
+        const validCollections = Object.keys(collections).filter(colId => 
+          collections[colId].items.length >= 2
+        );
 
-            const groupTitle = document.createElement('div');
-            groupTitle.className = 'group-title';
-            groupTitle.innerHTML = `${TYPE_NAMES[type] || type} <span class="count">(${groupedItems[type].length})</span>`;
-            groupDiv.appendChild(groupTitle);
+        // Rozdelíme kolekcie na tracks a non-tracks
+        const nonTracksCollections = [];
+        const tracksCollections = [];
+        
+        validCollections.forEach(colId => {
+          const collection = collections[colId];
+          // Zistíme či je to tracks kolekcia
+          const isTracksCollection = collection.items.some(({ entry }) => 
+            entry.tracks && entry.tracks.length > 0
+          );
+          
+          if (isTracksCollection) {
+            tracksCollections.push(colId);
+          } else {
+            nonTracksCollections.push(colId);
+          }
+        });
 
-            const gridDiv = document.createElement('div');
-            gridDiv.className = 'items-grid';
+        // Najprv renderujeme non-tracks kolekcie
+        if (nonTracksCollections.length > 0) {
+          nonTracksCollections.forEach(collectionId => {
+            const collection = collections[collectionId];
+            const collectionDiv = document.createElement('div');
+            collectionDiv.className = 'group';
 
-            groupedItems[type].forEach(item => {
+            const collectionTitle = document.createElement('div');
+            collectionTitle.className = 'group-title';
+            collectionTitle.innerHTML = `${collection.name} <span class="count">(${collection.items.length})</span>`;
+            collectionDiv.appendChild(collectionTitle);
+
+            const collectionGridDiv = document.createElement('div');
+            collectionGridDiv.className = 'items-grid';
+
+            collection.items.forEach(({ entryIndex, entry }) => {
+              // Nájdeme item v itemsWithMetadata
+              const itemData = itemsWithMetadata.find(item => item.entryIndex === entryIndex);
+              if (!itemData) return;
+
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'item';
+              if (itemData.rarity) {
+                itemDiv.setAttribute('data-rarity', itemData.rarity);
+              }
+
+              const artistHtml = itemData.artist ? `<div class="item-artist">${itemData.artist}</div>` : '';
+
+              itemDiv.innerHTML = `
+                <img src="${itemData.image}" alt="${itemData.name}">
+                <div class="item-name">${itemData.name}</div>
+                ${artistHtml}
+                <div class="item-price">
+                  ${itemData.price}
+                  <img src="https://fortnite-api.com/images/vbuck.png" alt="V-Bucks">
+                </div>
+              `;
+              collectionGridDiv.appendChild(itemDiv);
+            });
+
+            collectionDiv.appendChild(collectionGridDiv);
+            shopContainer.appendChild(collectionDiv);
+          });
+        }
+
+        // Renderuj Sets sekciu ak existujú nejaké sety
+        if (Object.keys(sets).length > 0) {
+          const setsGroupDiv = document.createElement('div');
+          setsGroupDiv.className = 'group';
+
+          const setsTitle = document.createElement('div');
+          setsTitle.className = 'group-title';
+          setsTitle.innerHTML = `Sets <span class="count">(${Object.keys(sets).length})</span>`;
+          setsGroupDiv.appendChild(setsTitle);
+
+          const setsGridDiv = document.createElement('div');
+          setsGridDiv.className = 'items-grid';
+
+          // Renderuj každý set
+          Object.keys(sets).sort().forEach(setName => {
+            const setItems = sets[setName];
+            
+            setItems.forEach(item => {
               const itemDiv = document.createElement('div');
               itemDiv.className = 'item';
               if (item.rarity) {
@@ -422,7 +617,68 @@
                 ${artistHtml}
                 <div class="item-price">
                   ${item.price}
-                  <img src="https://fortnite-api.com/images/vbuck.png" alt="V-Bucks" style="width:16px;height:16px;margin-left:4px;">
+                  <img src="https://fortnite-api.com/images/vbuck.png" alt="V-Bucks">
+                </div>
+              `;
+              setsGridDiv.appendChild(itemDiv);
+            });
+          });
+
+          setsGroupDiv.appendChild(setsGridDiv);
+          shopContainer.appendChild(setsGroupDiv);
+        }
+
+        const typeOrder = ['outfit', 'backpack', 'pickaxe', 'glider', 'wrap', 'sidekick', 'shoes', 'kicks', 'emote', 'emoji', 'spray', 'loadingscreen', 'contrail', 'music', 'banner', 'toy', 'pet', 'itemwrap', 'aura', 'guitar', 'bass', 'drum', 'microphone', 'keytar', 'bundle', 'other', 'tracks'];
+
+        typeOrder.forEach(type => {
+          if (groupedItems[type] && groupedItems[type].length > 0) {
+            // Počítame len items ktoré NIE SÚ v setoch a NIE SÚ v bundloch
+            const itemsNotInSets = groupedItems[type].filter((item, index) => {
+              // Ak je item v sete, preskočíme ho
+              if (itemsInSets.has(`${type}-${index}`)) return false;
+              
+              // Ak je item v bundle, preskočíme ho (okrem bundles a tracks kategórie)
+              if (type !== 'bundle' && type !== 'tracks' && item.itemId && itemsInBundles.has(item.itemId)) {
+                return false;
+              }
+              
+              // Ak je item v kolekcii (má layoutId), preskočíme ho
+              if (item.layoutId && validCollections.includes(item.layoutId)) {
+                return false;
+              }
+              
+              return true;
+            });
+            
+            if (itemsNotInSets.length === 0) return; // Skip ak sú všetky v setoch/bundloch/kolekciach
+            
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'group';
+
+            const groupTitle = document.createElement('div');
+            groupTitle.className = 'group-title';
+            groupTitle.innerHTML = `${TYPE_NAMES[type] || type} <span class="count">(${itemsNotInSets.length})</span>`;
+            groupDiv.appendChild(groupTitle);
+
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'items-grid';
+
+            itemsNotInSets.forEach(item => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'item';
+              if (item.rarity) {
+                itemDiv.setAttribute('data-rarity', item.rarity);
+              }
+
+              const artistHtml = item.artist ? `<div class="item-artist">${item.artist}</div>` : '';
+
+              itemDiv.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <div class="item-name">${item.name}</div>
+                ${artistHtml}
+                <div class="item-price">
+                  ${item.price}
+                  <img src="https://fortnite-api.com/images/vbuck.png" alt="V-Bucks">
                 </div>
               `;
               gridDiv.appendChild(itemDiv);
@@ -432,6 +688,50 @@
             shopContainer.appendChild(groupDiv);
           }
         });
+
+        // Nakoniec renderujeme tracks kolekcie
+        if (tracksCollections.length > 0) {
+          tracksCollections.forEach(collectionId => {
+            const collection = collections[collectionId];
+            const collectionDiv = document.createElement('div');
+            collectionDiv.className = 'group';
+
+            const collectionTitle = document.createElement('div');
+            collectionTitle.className = 'group-title';
+            collectionTitle.innerHTML = `${collection.name} <span class="count">(${collection.items.length})</span>`;
+            collectionDiv.appendChild(collectionTitle);
+
+            const collectionGridDiv = document.createElement('div');
+            collectionGridDiv.className = 'items-grid';
+
+            collection.items.forEach(({ entryIndex, entry }) => {
+              const itemData = itemsWithMetadata.find(item => item.entryIndex === entryIndex);
+              if (!itemData) return;
+
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'item';
+              if (itemData.rarity) {
+                itemDiv.setAttribute('data-rarity', itemData.rarity);
+              }
+
+              const artistHtml = itemData.artist ? `<div class="item-artist">${itemData.artist}</div>` : '';
+
+              itemDiv.innerHTML = `
+                <img src="${itemData.image}" alt="${itemData.name}">
+                <div class="item-name">${itemData.name}</div>
+                ${artistHtml}
+                <div class="item-price">
+                  ${itemData.price}
+                  <img src="https://fortnite-api.com/images/vbuck.png" alt="V-Bucks">
+                </div>
+              `;
+              collectionGridDiv.appendChild(itemDiv);
+            });
+
+            collectionDiv.appendChild(collectionGridDiv);
+            shopContainer.appendChild(collectionDiv);
+          });
+        }
 
       } catch (err) {
         console.error("Chyba pri nacitani alebo spracovani dat:", err);
