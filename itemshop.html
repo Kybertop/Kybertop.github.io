@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortnite Item Shop</title>
+  <style>
+    :root{
+      --bg:#0c0c0d; 
+      --panel:#111113; 
+      --text:#e6e6e8; 
+      --muted:#b6b6bb;
+      --accent:#e11d2e; 
+      --accent-700:#960b17; 
+      --border:#1e1f22; 
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Cantarell,"Noto Sans","Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    * { box-sizing:border-box; }
+    html, body { height:100%; margin:0; }
+    
+    body {
+      background:linear-gradient(180deg,#0a0a0a 0%,#0e0e10 100%);
+      color:var(--text);
+      font-family:var(--font);
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      padding:20px;
+    }
+
+    .container {
+      max-width:1400px;
+      margin:0 auto;
+    }
+
+    header {
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h1 {
+      font-size:clamp(32px,4vw,48px);
+      font-weight:800;
+      letter-spacing:.3px;
+      margin:0 0 12px;
+      background:linear-gradient(135deg, var(--accent) 0%, #ff4d5a 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    .subtitle {
+      color:var(--muted);
+      font-size:14px;
+      margin:0;
+    }
+
+    .loading {
+      text-align:center;
+      padding:60px 20px;
+      color:var(--muted);
+      font-size:18px;
+    }
+
+    .error {
+      text-align:center;
+      padding:40px 20px;
+      color:#f87171;
+      font-size:16px;
+      background:linear-gradient(180deg,#111113,#0f0f11);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      margin:20px 0;
+    }
+
+    /* Group styling */
+    .group {
+      margin-bottom:40px;
+    }
+
+    .group-title {
+      font-size:20px;
+      font-weight:800;
+      margin:0 0 16px;
+      padding:10px 16px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:linear-gradient(180deg,#131315,#101013);
+      box-shadow:var(--shadow);
+    }
+
+    .group-title .count {
+      font-weight:700;
+      color:var(--muted);
+      font-size:15px;
+      margin-left:4px;
+    }
+
+    .items-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+      gap:16px;
+    }
+
+    @media (max-width:768px) {
+      .items-grid {
+        grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+        gap:12px;
+      }
+    }
+
+    .item {
+      background:linear-gradient(180deg,#111113,#0f0f11);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      transition:transform 0.2s ease, border-color 0.2s ease;
+      cursor:pointer;
+      text-align:center;
+    }
+
+    .item:hover {
+      transform:translateY(-4px);
+      border-color:var(--accent);
+    }
+
+    .item img {
+      width:100%;
+      height:200px;
+      object-fit:contain;
+      border-radius:10px;
+      margin-bottom:12px;
+      background:#0a0a0a;
+    }
+
+    .item-name {
+      font-weight:700;
+      font-size:14px;
+      color:var(--text);
+      margin:0 0 6px;
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1.3;
+    }
+
+    .item-artist {
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 8px;
+      font-style:italic;
+    }
+
+    .item-price {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:linear-gradient(180deg,var(--accent),var(--accent-700));
+      font-weight:800;
+      font-size:14px;
+      color:white;
+    }
+
+    /* Rarity borders */
+    .item[data-rarity="legendary"] { border-color:#d97706; }
+    .item[data-rarity="epic"] { border-color:#a855f7; }
+    .item[data-rarity="rare"] { border-color:#3b82f6; }
+    .item[data-rarity="uncommon"] { border-color:#22c55e; }
+    .item[data-rarity="common"] { border-color:#6b7280; }
+    .item[data-rarity="mythic"] { border-color:#fbbf24; box-shadow:0 0 10px rgba(251,191,36,0.3); }
+    .item[data-rarity="exotic"] { border-color:#14b8a6; box-shadow:0 0 10px rgba(20,184,166,0.3); }
+    .item[data-rarity="transcendent"] { border-color:#ec4899; box-shadow:0 0 10px rgba(236,72,153,0.3); }
+    .item[data-rarity="gaminglegends"] { border-color:#8b5cf6; }
+    .item[data-rarity="dark"] { border-color:#7c3aed; }
+    .item[data-rarity="frozen"] { border-color:#06b6d4; }
+    .item[data-rarity="lava"] { border-color:#f97316; }
+    .item[data-rarity="marvel"] { border-color:#dc2626; }
+    .item[data-rarity="dc"] { border-color:#1e40af; }
+    .item[data-rarity="icon"] { border-color:#facc15; }
+    .item[data-rarity="starwars"] { border-color:#fbbf24; }
+    .item[data-rarity="shadow"] { border-color:#4b5563; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Fortnite Item Shop</h1>
+      <p class="subtitle">Aktualna ponuka itemov</p>
+    </header>
+
+    <div id="shop">
+      <div class="loading">Nacitavam data...</div>
+    </div>
+  </div>
+
+  <script>
+    const SHOP_JSON_URL = "https://fortnite-api.com/v2/shop";
+    const COSMETICS_JSON_URL = "https://fortnite-api.com/v2/cosmetics";
+
+    const TYPE_NAMES = {
+      'outfit': 'Outfits',
+      'backpack': 'Back Blings',
+      'pickaxe': 'Pickaxes',
+      'glider': 'Gliders',
+      'wrap': 'Wraps',
+      'emote': 'Emotes',
+      'emoji': 'Emojis',
+      'spray': 'Sprays',
+      'loadingscreen': 'Loading Screens',
+      'contrail': 'Contrails',
+      'music': 'Music Packs',
+      'banner': 'Banners',
+      'toy': 'Toys',
+      'pet': 'Pets',
+      'itemwrap': 'Item Wraps',
+      'bundle': 'Bundles',
+      'aura': 'Auras',
+      'guitar': 'Guitars',
+      'bass': 'Bass',
+      'drum': 'Drums',
+      'microphone': 'Microphones',
+      'keytar': 'Keytars',
+      'tracks': 'Jam Tracks',
+      'other': 'Other'
+    };
+
+    function cleanItemName(name) {
+      if (!name) return "Neznamy item";
+      
+      // Odstráň [Virtual] a podobné prefixy
+      name = name.replace(/^\[Virtual\]\s*/i, '');
+      name = name.replace(/^\[VIRTUAL\]\s*/i, '');
+      
+      // Odstráň množstvo (1x, 2x, atď.) na začiatku
+      name = name.replace(/^\d+x\s+/i, '');
+      
+      // Odstráň "for X MtxCurrency" alebo "for X V-Bucks"
+      name = name.replace(/\s+for\s+\d+\s+MtxCurrency/gi, '');
+      name = name.replace(/\s+for\s+\d+\s+V-Bucks/gi, '');
+      
+      // Odstráň "Bundle" duplikáty
+      name = name.replace(/\s+Bundle\s+Bundle$/i, ' Bundle');
+      
+      return name.trim();
+    }
+
+    async function loadData() {
+      const shopContainer = document.getElementById('shop');
+      shopContainer.innerHTML = "Nacitavam data...";
+
+      try {
+        const shopResponse = await fetch(SHOP_JSON_URL, {
+          headers: { "Authorization": "" }
+        });
+        
+        if (!shopResponse.ok) {
+          const errorText = await shopResponse.text();
+          throw new Error(`Chyba pri nacitani Shop API: ${shopResponse.status} ${shopResponse.statusText}. Detaily: ${errorText}`);
+        }
+        
+        const shopData = await shopResponse.json();
+
+        if (!shopData || !shopData.data || !shopData.data.entries || !Array.isArray(shopData.data.entries)) {
+          throw new Error("Neocakavana struktura dat zo Shop API. Chyba 'data.entries'.");
+        }
+
+        const shopEntries = shopData.data.entries;
+
+        const cosmeticsResponse = await fetch(COSMETICS_JSON_URL, {
+          headers: { "Authorization": "" }
+        });
+        
+        if (!cosmeticsResponse.ok) {
+          const errorText = await cosmeticsResponse.text();
+          throw new Error(`Chyba pri nacitani Cosmetics API: ${cosmeticsResponse.status} ${cosmeticsResponse.statusText}. Detaily: ${errorText}`);
+        }
+        
+        const cosmeticsData = await cosmeticsResponse.json();
+
+        if (!cosmeticsData || !cosmeticsData.data || !cosmeticsData.data.br || !Array.isArray(cosmeticsData.data.br)) {
+          throw new Error("Neocakavana struktura dat z Cosmetics API. Chyba 'data.br'.");
+        }
+
+        const allCosmetics = cosmeticsData.data.br;
+
+        const cosmeticsMap = new Map();
+        allCosmetics.forEach(cosmetic => {
+          cosmeticsMap.set(cosmetic.id, cosmetic);
+        });
+
+        shopContainer.innerHTML = "";
+
+        if (shopEntries.length === 0) {
+          shopContainer.innerHTML = "<p class='error'>Dnes ziadne polozky v obchode!</p>";
+          return;
+        }
+
+        const groupedItems = {};
+
+        shopEntries.forEach(entry => {
+          let name = "Neznamy item";
+          let image = "https://fortnite-api.com/images/vbucks.png";
+          let price = entry.finalPrice || "???";
+          let artist = "";
+          let type = "other";
+          let rarity = null;
+
+          // Debug - pozrieme si strukturu entry
+          console.log("Entry structure:", entry);
+
+          if (entry.tracks && entry.tracks.length > 0) {
+            const track = entry.tracks[0];
+            name = cleanItemName(track.title || "Neznamy Jam Track");
+            artist = track.artist || "";
+            image = track.albumArt || image;
+            type = "tracks";
+            console.log("Found track:", name, type);
+          } else if (entry.bundle) {
+            name = cleanItemName(entry.bundle.name || "Neznamy Bundle");
+            image = entry.bundle.image || image;
+            type = "bundle";
+            console.log("Found bundle:", name, type);
+          } else {
+            // Skúsime rôzne spôsoby získania ID
+            let itemId = entry.items?.[0]?.id || 
+                        entry.items?.[0]?.offerId ||
+                        entry.brItems?.[0]?.id ||
+                        entry.brItems?.[0]?.offerId ||
+                        entry.offerId;
+            
+            name = cleanItemName(entry.items?.[0]?.name || entry.devName || "Neznamy item");
+            
+            console.log("Processing item:", name, "ID:", itemId, "Full entry.items:", entry.items);
+
+            if (itemId && cosmeticsMap.has(itemId)) {
+              const cosmeticDetails = cosmeticsMap.get(itemId);
+              
+              image = cosmeticDetails.images?.featured ||
+                      cosmeticDetails.images?.icon ||
+                      cosmeticDetails.images?.smallIcon ||
+                      image;
+              
+              if (name === "Unnamed" || name === "Neznamy item") {
+                name = cleanItemName(cosmeticDetails.name || name);
+              }
+
+              // Správne získanie typu
+              if (cosmeticDetails.type && cosmeticDetails.type.value) {
+                type = cosmeticDetails.type.value.toLowerCase();
+                console.log("Found type from cosmetics:", type, "for item:", name);
+              } else {
+                type = "other";
+                console.log("No type found, using 'other' for:", name);
+              }
+              
+              // Získanie rarity
+              if (cosmeticDetails.rarity && cosmeticDetails.rarity.value) {
+                rarity = cosmeticDetails.rarity.value.toLowerCase();
+              }
+            } else {
+              console.log("Item not found in cosmeticsMap:", name, itemId);
+              image = entry.newDisplayAsset?.renderImages?.[0]?.image ||
+                      entry.newDisplayAsset?.materialInstances?.[0]?.images?.Background ||
+                      entry.newDisplayAsset?.materialInstances?.[0]?.images?.OfferImage ||
+                      entry.displayAssets?.[0]?.full_background ||
+                      image;
+            }
+          }
+
+          if (!groupedItems[type]) {
+            groupedItems[type] = [];
+          }
+          
+          groupedItems[type].push({
+            name: name,
+            image: image,
+            price: price,
+            artist: artist,
+            rarity: rarity
+          });
+        });
+
+        const typeOrder = ['outfit', 'backpack', 'pickaxe', 'glider', 'wrap', 'emote', 'emoji', 'spray', 'loadingscreen', 'contrail', 'music', 'banner', 'toy', 'pet', 'itemwrap', 'aura', 'guitar', 'bass', 'drum', 'microphone', 'keytar', 'bundle', 'other', 'tracks'];
+
+        typeOrder.forEach(type => {
+          if (groupedItems[type] && groupedItems[type].length > 0) {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'group';
+
+            const groupTitle = document.createElement('div');
+            groupTitle.className = 'group-title';
+            groupTitle.innerHTML = `${TYPE_NAMES[type] || type} <span class="count">(${groupedItems[type].length})</span>`;
+            groupDiv.appendChild(groupTitle);
+
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'items-grid';
+
+            groupedItems[type].forEach(item => {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'item';
+              if (item.rarity) {
+                itemDiv.setAttribute('data-rarity', item.rarity);
+              }
+
+              const artistHtml = item.artist ? `<div class="item-artist">${item.artist}</div>` : '';
+
+              itemDiv.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <div class="item-name">${item.name}</div>
+                ${artistHtml}
+                <div class="item-price">${item.price}</div>
+              `;
+              gridDiv.appendChild(itemDiv);
+            });
+
+            groupDiv.appendChild(gridDiv);
+            shopContainer.appendChild(groupDiv);
+          }
+        });
+
+      } catch (err) {
+        console.error("Chyba pri nacitani alebo spracovani dat:", err);
+        shopContainer.innerHTML = `<p class="error">Nepodarilo sa nacitat data.<br>${err.message}</p>`;
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
