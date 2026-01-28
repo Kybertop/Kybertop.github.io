@@ -42,6 +42,13 @@ function initTheme() {
 // ==================== GOOGLE SHEETS API ====================
 
 async function loadOrders() {
+    const container = document.getElementById('orders-list');
+    
+    // Zobraz loading len ak je prázdne
+    if (orders.length === 0 && container) {
+        container.innerHTML = '<div class="empty-state"><p>Načítavam...</p></div>';
+    }
+    
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=get`);
         const data = await response.json();
@@ -299,7 +306,7 @@ async function submitReservation() {
     }
 }
 
-// ==================== IMAGE DRAG ====================
+// ==================== IMAGE ZOOM & DRAG ====================
 
 function initImageZoomDrag() {
     const container = document.getElementById('menu-container');
@@ -307,62 +314,116 @@ function initImageZoomDrag() {
     
     if (!container || !image) return;
     
-    let isDragging = false;
-    let startX, startY, scrollLeft, scrollTop;
+    let scale = 1;
+    let panning = false;
+    let pointX = 0;
+    let pointY = 0;
+    let startX = 0;
+    let startY = 0;
     
-    // Mouse drag for scrolling
-    container.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        isDragging = true;
-        startX = e.pageX - container.offsetLeft;
-        startY = e.pageY - container.offsetTop;
-        scrollLeft = container.scrollLeft;
-        scrollTop = container.scrollTop;
-        container.style.cursor = 'grabbing';
+    function setTransform() {
+        image.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+    }
+    
+    // Mouse wheel zoom
+    container.addEventListener('wheel', (e) => {
         e.preventDefault();
+        
+        const xs = (e.clientX - container.getBoundingClientRect().left - pointX) / scale;
+        const ys = (e.clientY - container.getBoundingClientRect().top - pointY) / scale;
+        
+        const delta = -e.deltaY;
+        if (delta > 0) {
+            scale *= 1.1;
+        } else {
+            scale /= 1.1;
+        }
+        
+        // Limit scale
+        scale = Math.min(Math.max(0.5, scale), 4);
+        
+        pointX = e.clientX - container.getBoundingClientRect().left - xs * scale;
+        pointY = e.clientY - container.getBoundingClientRect().top - ys * scale;
+        
+        setTransform();
     });
     
-    container.addEventListener('mouseleave', () => {
-        isDragging = false;
-        container.style.cursor = 'grab';
+    // Mouse drag - len pri držaní ľavého tlačidla
+    container.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return; // Len ľavé tlačidlo
+        e.preventDefault();
+        panning = true;
+        startX = e.clientX - pointX;
+        startY = e.clientY - pointY;
+        container.style.cursor = 'grabbing';
     });
     
     container.addEventListener('mouseup', () => {
-        isDragging = false;
+        panning = false;
+        container.style.cursor = 'grab';
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        panning = false;
         container.style.cursor = 'grab';
     });
     
     container.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
+        if (!panning) return;
         e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
-        const y = e.pageY - container.offsetTop;
-        const walkX = (x - startX);
-        const walkY = (y - startY);
-        container.scrollLeft = scrollLeft - walkX;
-        container.scrollTop = scrollTop - walkY;
+        pointX = e.clientX - startX;
+        pointY = e.clientY - startY;
+        setTransform();
     });
     
-    // Touch support for drag
-    let touchStartX, touchStartY;
+    // Touch support
+    let lastTouchDist = 0;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
     
     container.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
-            touchStartX = e.touches[0].pageX;
-            touchStartY = e.touches[0].pageY;
-            scrollLeft = container.scrollLeft;
-            scrollTop = container.scrollTop;
+            panning = true;
+            startX = e.touches[0].clientX - pointX;
+            startY = e.touches[0].clientY - pointY;
+        } else if (e.touches.length === 2) {
+            panning = false;
+            lastTouchDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
         }
     });
     
     container.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 1) {
-            e.preventDefault();
-            const x = e.touches[0].pageX;
-            const y = e.touches[0].pageY;
-            container.scrollLeft = scrollLeft - (x - touchStartX);
-            container.scrollTop = scrollTop - (y - touchStartY);
+        e.preventDefault();
+        
+        if (e.touches.length === 1 && panning) {
+            pointX = e.touches[0].clientX - startX;
+            pointY = e.touches[0].clientY - startY;
+            setTransform();
+        } else if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            scale *= dist / lastTouchDist;
+            scale = Math.min(Math.max(0.5, scale), 4);
+            lastTouchDist = dist;
+            setTransform();
         }
+    });
+    
+    container.addEventListener('touchend', () => {
+        panning = false;
+    });
+    
+    // Double click to reset
+    container.addEventListener('dblclick', () => {
+        scale = 1;
+        pointX = 0;
+        pointY = 0;
+        setTransform();
     });
 }
 
@@ -418,6 +479,15 @@ function renderOrders() {
     
     container.innerHTML = filteredOrders.map(order => {
         const soupText = order.soup === 'Bez' ? 'Bez polievky' : `Polievka ${order.soup}`;
+        // Extrahuj len čas HH:MM
+        let pickupTime = order.pickupTime || '';
+        if (pickupTime.includes('T')) {
+            // Ak je to ISO timestamp, extrahuj čas
+            pickupTime = pickupTime.split('T')[1]?.substring(0, 5) || pickupTime;
+        } else if (pickupTime.length > 5) {
+            pickupTime = pickupTime.substring(0, 5);
+        }
+        
         return `
             <div class="order-card ${order.completed ? 'completed' : ''}" data-id="${order.id}">
                 <div class="order-info">
@@ -425,7 +495,7 @@ function renderOrders() {
                     <div class="order-name">${escapeHtml(order.firstName || '')} ${escapeHtml(order.lastName || '')}</div>
                     <div class="order-details">${soupText} • Menu ${order.menu}</div>
                     ${order.note ? `<div class="order-note">Poznámka: ${escapeHtml(order.note)}</div>` : ''}
-                    <div class="order-time">Vyzdvihnutie: ${order.pickupTime}</div>
+                    <div class="order-time">Vyzdvihnutie: ${pickupTime}</div>
                 </div>
                 <div class="order-actions">
                     <button class="action-btn complete" title="${order.completed ? 'Zrušiť vyzdvihnutie' : 'Označiť ako vyzdvihnuté'}" onclick="toggleComplete(${order.id})">

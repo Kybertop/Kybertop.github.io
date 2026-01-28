@@ -171,8 +171,8 @@ body {
 
 .menu-image-container {
     position: relative;
-    overflow: auto;
-    max-height: 600px;
+    overflow: hidden;
+    height: 500px;
     cursor: grab;
     background: var(--color-bg);
 }
@@ -183,8 +183,9 @@ body {
 
 .menu-image {
     display: block;
-    max-width: none;
+    width: 100%;
     height: auto;
+    transform-origin: 0 0;
     user-select: none;
     -webkit-user-drag: none;
 }
