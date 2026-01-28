@@ -183,9 +183,8 @@ body {
 
 .menu-image {
     display: block;
-    width: 100%;
+    max-width: none;
     height: auto;
-    transform-origin: 0 0;
     user-select: none;
     -webkit-user-drag: none;
 }

@@ -299,7 +299,7 @@ async function submitReservation() {
     }
 }
 
-// ==================== IMAGE ZOOM & DRAG ====================
+// ==================== IMAGE DRAG ====================
 
 function initImageZoomDrag() {
     const container = document.getElementById('menu-container');
@@ -307,27 +307,8 @@ function initImageZoomDrag() {
     
     if (!container || !image) return;
     
-    let currentZoom = 1;
     let isDragging = false;
     let startX, startY, scrollLeft, scrollTop;
-    
-    function updateZoom() {
-        image.style.transform = `scale(${currentZoom})`;
-        image.style.width = currentZoom === 1 ? '100%' : 'auto';
-    }
-    
-    // Mouse wheel zoom
-    container.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        
-        if (e.deltaY < 0) {
-            currentZoom = Math.min(4, currentZoom * 1.15);
-        } else {
-            currentZoom = Math.max(1, currentZoom / 1.15);
-        }
-        
-        updateZoom();
-    });
     
     // Mouse drag for scrolling
     container.addEventListener('mousedown', (e) => {
@@ -338,6 +319,7 @@ function initImageZoomDrag() {
         scrollLeft = container.scrollLeft;
         scrollTop = container.scrollTop;
         container.style.cursor = 'grabbing';
+        e.preventDefault();
     });
     
     container.addEventListener('mouseleave', () => {
@@ -355,44 +337,32 @@ function initImageZoomDrag() {
         e.preventDefault();
         const x = e.pageX - container.offsetLeft;
         const y = e.pageY - container.offsetTop;
-        const walkX = (x - startX) * 1.5;
-        const walkY = (y - startY) * 1.5;
+        const walkX = (x - startX);
+        const walkY = (y - startY);
         container.scrollLeft = scrollLeft - walkX;
         container.scrollTop = scrollTop - walkY;
     });
     
-    // Touch support - pinch zoom
-    let lastTouchDist = 0;
-    let initialZoom = 1;
+    // Touch support for drag
+    let touchStartX, touchStartY;
     
     container.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-            lastTouchDist = getTouchDistance(e.touches);
-            initialZoom = currentZoom;
+        if (e.touches.length === 1) {
+            touchStartX = e.touches[0].pageX;
+            touchStartY = e.touches[0].pageY;
+            scrollLeft = container.scrollLeft;
+            scrollTop = container.scrollTop;
         }
     });
     
     container.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2) {
+        if (e.touches.length === 1) {
             e.preventDefault();
-            const dist = getTouchDistance(e.touches);
-            currentZoom = Math.max(1, Math.min(4, initialZoom * (dist / lastTouchDist)));
-            updateZoom();
+            const x = e.touches[0].pageX;
+            const y = e.touches[0].pageY;
+            container.scrollLeft = scrollLeft - (x - touchStartX);
+            container.scrollTop = scrollTop - (y - touchStartY);
         }
-    });
-    
-    function getTouchDistance(touches) {
-        const dx = touches[0].clientX - touches[1].clientX;
-        const dy = touches[0].clientY - touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-    
-    // Double click to reset
-    container.addEventListener('dblclick', () => {
-        currentZoom = 1;
-        updateZoom();
-        container.scrollLeft = 0;
-        container.scrollTop = 0;
     });
 }
 
@@ -421,10 +391,10 @@ function updateDayFilter() {
 function renderOrders() {
     const container = document.getElementById('orders-list');
     const filterValue = document.getElementById('filter-day').value;
-    const days = getAvailableDays();
-    const validDates = days.map(d => d.fullDateStr);
     
-    let filteredOrders = orders.filter(o => validDates.includes(o.date));
+    console.log('Všetky objednávky:', orders);
+    
+    let filteredOrders = [...orders];
     
     if (filterValue !== 'all') {
         filteredOrders = filteredOrders.filter(o => o.date === filterValue);
@@ -434,7 +404,7 @@ function renderOrders() {
         if (a.date !== b.date) {
             return a.date.localeCompare(b.date);
         }
-        return a.pickupTime.localeCompare(b.pickupTime);
+        return (a.pickupTime || '').localeCompare(b.pickupTime || '');
     });
     
     if (filteredOrders.length === 0) {
@@ -451,8 +421,8 @@ function renderOrders() {
         return `
             <div class="order-card ${order.completed ? 'completed' : ''}" data-id="${order.id}">
                 <div class="order-info">
-                    <div class="order-day-badge">${order.dayName} ${formatDateFromStr(order.date)}</div>
-                    <div class="order-name">${escapeHtml(order.firstName)} ${escapeHtml(order.lastName)}</div>
+                    <div class="order-day-badge">${order.dayName || ''} ${order.date ? formatDateFromStr(order.date) : ''}</div>
+                    <div class="order-name">${escapeHtml(order.firstName || '')} ${escapeHtml(order.lastName || '')}</div>
                     <div class="order-details">${soupText} • Menu ${order.menu}</div>
                     ${order.note ? `<div class="order-note">Poznámka: ${escapeHtml(order.note)}</div>` : ''}
                     <div class="order-time">Vyzdvihnutie: ${order.pickupTime}</div>
