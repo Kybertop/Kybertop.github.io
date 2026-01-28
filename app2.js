@@ -6,12 +6,6 @@ const shortDayNames = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
 let selectedDay = null;
 let orders = [];
 
-// Zoom a drag stav
-let currentZoom = 1;
-let imgX = 0, imgY = 0;
-let isDragging = false;
-let dragStartX, dragStartY, imgStartX, imgStartY;
-
 // Auto-refresh interval
 let refreshInterval = null;
 const REFRESH_INTERVAL = 10000; // 10 sekúnd
@@ -45,108 +39,70 @@ function initTheme() {
     });
 }
 
-// ==================== GITHUB API ====================
+// ==================== GOOGLE SHEETS API ====================
 
 async function loadOrders() {
-    if (CONFIG.USE_GITHUB) {
-        try {
-            const response = await fetch(
-                `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.ORDERS_FILE}`,
-                {
-                    headers: {
-                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    cache: 'no-store'
-                }
-            );
-            
-            if (response.ok) {
-                const data = await response.json();
-                const content = atob(data.content);
-                orders = JSON.parse(content);
-            } else if (response.status === 404) {
-                orders = [];
-                await saveOrders();
-            } else {
-                throw new Error('GitHub API error');
-            }
-        } catch (error) {
-            console.error('Chyba pri načítaní z GitHub:', error);
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=get`);
+        const data = await response.json();
+        
+        if (Array.isArray(data)) {
+            orders = data;
+        } else if (data.error) {
+            console.error('API error:', data.error);
             loadFromLocalStorage();
         }
-    } else {
+    } catch (error) {
+        console.error('Chyba pri načítaní:', error);
         loadFromLocalStorage();
     }
     
     renderOrders();
 }
 
-async function saveOrders() {
-    if (CONFIG.USE_GITHUB) {
-        try {
-            let sha = null;
-            try {
-                const getResponse = await fetch(
-                    `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.ORDERS_FILE}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        },
-                        cache: 'no-store'
-                    }
-                );
-                if (getResponse.ok) {
-                    const data = await getResponse.json();
-                    sha = data.sha;
-                }
-            } catch (e) {}
-            
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(orders, null, 2))));
-            const body = {
-                message: `Objednávka - ${new Date().toLocaleString('sk-SK')}`,
-                content: content,
-                branch: CONFIG.GITHUB_BRANCH
-            };
-            
-            if (sha) {
-                body.sha = sha;
-            }
-            
-            const response = await fetch(
-                `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.ORDERS_FILE}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(body)
-                }
-            );
-            
-            if (!response.ok) {
-                throw new Error('GitHub API error');
-            }
-        } catch (error) {
-            console.error('Chyba pri ukladaní na GitHub:', error);
-            showToast('Chyba pri ukladaní', 'error');
-            saveToLocalStorage();
+async function addOrder(order) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=add&data=${encodeURIComponent(JSON.stringify(order))}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            orders.push(order);
+            return true;
+        } else {
+            console.error('API error:', result.error);
+            return false;
         }
-    } else {
-        saveToLocalStorage();
+    } catch (error) {
+        console.error('Chyba pri ukladaní:', error);
+        return false;
+    }
+}
+
+async function updateOrderInSheet(order) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=update&data=${encodeURIComponent(JSON.stringify(order))}`);
+        const result = await response.json();
+        return result.success;
+    } catch (error) {
+        console.error('Chyba pri aktualizácii:', error);
+        return false;
+    }
+}
+
+async function deleteOrderFromSheet(id) {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=delete&id=${id}`);
+        const result = await response.json();
+        return result.success;
+    } catch (error) {
+        console.error('Chyba pri mazaní:', error);
+        return false;
     }
 }
 
 function loadFromLocalStorage() {
     const stored = localStorage.getItem('lunch_orders');
     orders = stored ? JSON.parse(stored) : [];
-}
-
-function saveToLocalStorage() {
-    localStorage.setItem('lunch_orders', JSON.stringify(orders));
 }
 
 // ==================== AUTO REFRESH ====================
@@ -299,14 +255,14 @@ async function submitReservation() {
     const submitBtn = document.getElementById('submit-btn');
     const formData = new FormData(form);
     
-    const soup = formData.get('soup');
+    const soup = formData.get('soup') || 'Bez'; // Default "Bez polievky" ak nie je vybraná
     const menu = formData.get('menu');
     const firstName = formData.get('firstName').trim();
     const lastName = formData.get('lastName').trim();
     const pickupTime = formData.get('pickupTime');
     const note = formData.get('note').trim();
     
-    if (!soup || !menu || !firstName || !lastName || !pickupTime) {
+    if (!menu || !firstName || !lastName || !pickupTime) {
         showToast('Vyplňte všetky povinné polia', 'error');
         return;
     }
@@ -328,16 +284,19 @@ async function submitReservation() {
         createdAt: new Date().toISOString()
     };
     
-    orders.push(order);
-    await saveOrders();
-    
-    form.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-    document.getElementById('note').value = '';
+    const success = await addOrder(order);
     
     submitBtn.disabled = false;
     submitBtn.textContent = 'Odoslať rezerváciu';
     
-    showToast(`Rezervácia na ${selectedDay.name} ${selectedDay.dateStr} bola odoslaná`, 'success');
+    if (success) {
+        form.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        document.getElementById('note').value = '';
+        showToast(`Rezervácia na ${selectedDay.name} ${selectedDay.dateStr} bola odoslaná`, 'success');
+        renderOrders();
+    } else {
+        showToast('Chyba pri odosielaní rezervácie', 'error');
+    }
 }
 
 // ==================== IMAGE ZOOM & DRAG ====================
@@ -348,121 +307,78 @@ function initImageZoomDrag() {
     
     if (!container || !image) return;
     
-    // Reset pozície
-    function resetPosition() {
-        currentZoom = 1;
-        imgX = 0;
-        imgY = 0;
-        updateImageTransform();
-    }
+    let currentZoom = 1;
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
     
-    function updateImageTransform() {
-        image.style.transform = `translate(${imgX}px, ${imgY}px) scale(${currentZoom})`;
-    }
-    
-    function clampPosition() {
-        const containerRect = container.getBoundingClientRect();
-        const imgWidth = image.naturalWidth * currentZoom;
-        const imgHeight = image.naturalHeight * currentZoom;
-        
-        const minX = Math.min(0, containerRect.width - imgWidth);
-        const minY = Math.min(0, containerRect.height - imgHeight);
-        
-        imgX = Math.max(minX, Math.min(0, imgX));
-        imgY = Math.max(minY, Math.min(0, imgY));
+    function updateZoom() {
+        image.style.transform = `scale(${currentZoom})`;
+        image.style.width = currentZoom === 1 ? '100%' : 'auto';
     }
     
     // Mouse wheel zoom
     container.addEventListener('wheel', (e) => {
         e.preventDefault();
         
-        const rect = container.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        
-        const prevZoom = currentZoom;
-        
         if (e.deltaY < 0) {
-            currentZoom = Math.min(4, currentZoom * 1.1);
+            currentZoom = Math.min(4, currentZoom * 1.15);
         } else {
-            currentZoom = Math.max(0.5, currentZoom / 1.1);
+            currentZoom = Math.max(1, currentZoom / 1.15);
         }
         
-        // Zoom k pozícii kurzora
-        const zoomRatio = currentZoom / prevZoom;
-        imgX = mouseX - (mouseX - imgX) * zoomRatio;
-        imgY = mouseY - (mouseY - imgY) * zoomRatio;
-        
-        clampPosition();
-        updateImageTransform();
+        updateZoom();
     });
     
-    // Mouse drag
+    // Mouse drag for scrolling
     container.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
         isDragging = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        imgStartX = imgX;
-        imgStartY = imgY;
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
         container.style.cursor = 'grabbing';
-        e.preventDefault();
     });
     
-    document.addEventListener('mousemove', (e) => {
+    container.addEventListener('mouseleave', () => {
+        isDragging = false;
+        container.style.cursor = 'grab';
+    });
+    
+    container.addEventListener('mouseup', () => {
+        isDragging = false;
+        container.style.cursor = 'grab';
+    });
+    
+    container.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        
-        imgX = imgStartX + (e.clientX - dragStartX);
-        imgY = imgStartY + (e.clientY - dragStartY);
-        
-        clampPosition();
-        updateImageTransform();
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = (x - startX) * 1.5;
+        const walkY = (y - startY) * 1.5;
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
     });
     
-    document.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-            container.style.cursor = 'grab';
-        }
-    });
-    
-    // Touch support
+    // Touch support - pinch zoom
     let lastTouchDist = 0;
-    let touchStartX, touchStartY;
+    let initialZoom = 1;
     
     container.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-            isDragging = true;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            imgStartX = imgX;
-            imgStartY = imgY;
-        } else if (e.touches.length === 2) {
-            isDragging = false;
+        if (e.touches.length === 2) {
             lastTouchDist = getTouchDistance(e.touches);
+            initialZoom = currentZoom;
         }
     });
     
     container.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        
-        if (e.touches.length === 1 && isDragging) {
-            imgX = imgStartX + (e.touches[0].clientX - touchStartX);
-            imgY = imgStartY + (e.touches[0].clientY - touchStartY);
-            clampPosition();
-            updateImageTransform();
-        } else if (e.touches.length === 2) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
             const dist = getTouchDistance(e.touches);
-            const scale = dist / lastTouchDist;
-            currentZoom = Math.max(0.5, Math.min(4, currentZoom * scale));
-            lastTouchDist = dist;
-            clampPosition();
-            updateImageTransform();
+            currentZoom = Math.max(1, Math.min(4, initialZoom * (dist / lastTouchDist)));
+            updateZoom();
         }
-    });
-    
-    container.addEventListener('touchend', () => {
-        isDragging = false;
     });
     
     function getTouchDistance(touches) {
@@ -473,13 +389,11 @@ function initImageZoomDrag() {
     
     // Double click to reset
     container.addEventListener('dblclick', () => {
-        resetPosition();
+        currentZoom = 1;
+        updateZoom();
+        container.scrollLeft = 0;
+        container.scrollTop = 0;
     });
-    
-    // Init
-    image.onload = () => {
-        resetPosition();
-    };
 }
 
 // ==================== OBJEDNÁVKY ====================
@@ -570,17 +484,26 @@ async function toggleComplete(id) {
     const order = orders.find(o => o.id === id);
     if (order) {
         order.completed = !order.completed;
-        await saveOrders();
-        renderOrders();
+        const success = await updateOrderInSheet(order);
+        if (success) {
+            renderOrders();
+        } else {
+            order.completed = !order.completed; // Revert
+            showToast('Chyba pri aktualizácii', 'error');
+        }
     }
 }
 
 async function deleteOrder(id) {
     if (confirm('Naozaj chcete vymazať túto objednávku?')) {
-        orders = orders.filter(o => o.id !== id);
-        await saveOrders();
-        renderOrders();
-        showToast('Objednávka bola vymazaná', 'success');
+        const success = await deleteOrderFromSheet(id);
+        if (success) {
+            orders = orders.filter(o => o.id !== id);
+            renderOrders();
+            showToast('Objednávka bola vymazaná', 'success');
+        } else {
+            showToast('Chyba pri mazaní', 'error');
+        }
     }
 }
 

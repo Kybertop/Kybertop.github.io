@@ -171,9 +171,10 @@ body {
 
 .menu-image-container {
     position: relative;
-    overflow: hidden;
+    overflow: auto;
+    max-height: 600px;
     cursor: grab;
-    height: 500px;
+    background: var(--color-bg);
 }
 
 .menu-image-container:active {
@@ -182,11 +183,9 @@ body {
 
 .menu-image {
     display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
+    width: 100%;
+    height: auto;
     transform-origin: 0 0;
-    min-width: 100%;
     user-select: none;
     -webkit-user-drag: none;
 }
