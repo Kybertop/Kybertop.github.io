@@ -479,13 +479,20 @@ function renderOrders() {
     
     container.innerHTML = filteredOrders.map(order => {
         const soupText = order.soup === 'Bez' ? 'Bez polievky' : `Polievka ${order.soup}`;
+        
         // Extrahuj len čas HH:MM
         let pickupTime = order.pickupTime || '';
-        if (pickupTime.includes('T')) {
-            // Ak je to ISO timestamp, extrahuj čas
-            pickupTime = pickupTime.split('T')[1]?.substring(0, 5) || pickupTime;
-        } else if (pickupTime.length > 5) {
-            pickupTime = pickupTime.substring(0, 5);
+        if (typeof pickupTime === 'string') {
+            if (pickupTime.includes('T')) {
+                // ISO timestamp - extrahuj čas
+                const timePart = pickupTime.split('T')[1];
+                if (timePart) {
+                    pickupTime = timePart.substring(0, 5);
+                }
+            } else if (pickupTime.includes(':')) {
+                // Už je to čas, vezmi prvých 5 znakov (HH:MM)
+                pickupTime = pickupTime.substring(0, 5);
+            }
         }
         
         return `
