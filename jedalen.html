@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obedové menu - Rezervácia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Obedové menu</h1>
+            <div class="header-actions">
+                <nav class="nav">
+                    <button class="nav-btn active" data-view="reservation">Rezervácia</button>
+                    <button class="nav-btn" data-view="orders">Objednávky</button>
+                </nav>
+                <button class="theme-toggle" id="theme-toggle" title="Prepnúť tému">
+                    <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Rezervačná sekcia -->
+            <section id="reservation-view" class="view active">
+                <div class="reservation-layout">
+                    <div class="menu-panel">
+                        <h2>Jedálniček</h2>
+                        <div class="menu-image-container" id="menu-container">
+                            <img src="assets/menu.jpg" alt="Týždenný jedálniček" class="menu-image" id="menu-image">
+                        </div>
+                    </div>
+
+                    <div class="order-panel">
+                        <h2>Rezervácia</h2>
+                        <form id="reservation-form">
+                            <div class="form-group">
+                                <label>Deň</label>
+                                <div class="day-selector" id="day-selector"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Polievka</label>
+                                <div class="radio-group radio-group-soup">
+                                    <label class="radio-option">
+                                        <input type="radio" name="soup" value="A" required>
+                                        <span class="radio-label">Polievka A</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="soup" value="B">
+                                        <span class="radio-label">Polievka B</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="soup" value="Bez">
+                                        <span class="radio-label">Bez polievky</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Hlavné jedlo</label>
+                                <div class="radio-group radio-group-vertical">
+                                    <label class="radio-option">
+                                        <input type="radio" name="menu" value="1" required>
+                                        <span class="radio-label">Menu 1</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="menu" value="2">
+                                        <span class="radio-label">Menu 2</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="menu" value="3">
+                                        <span class="radio-label">Menu 3</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="menu" value="4">
+                                        <span class="radio-label">Menu 4</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="menu" value="5">
+                                        <span class="radio-label">Menu 5</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="note">Poznámka</label>
+                                <textarea id="note" name="note" rows="2" placeholder="Voliteľná poznámka..."></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">Meno</label>
+                                    <input type="text" id="firstName" name="firstName" required placeholder="Meno">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Priezvisko</label>
+                                    <input type="text" id="lastName" name="lastName" required placeholder="Priezvisko">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pickupTime">Čas vyzdvihnutia</label>
+                                <select id="pickupTime" name="pickupTime" required>
+                                    <option value="12:00">12:00</option>
+                                    <option value="12:10">12:10</option>
+                                    <option value="12:20">12:20</option>
+                                    <option value="12:30">12:30</option>
+                                    <option value="12:40">12:40</option>
+                                    <option value="12:45">12:45</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="submit-btn" id="submit-btn">Odoslať rezerváciu</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sekcia objednávok pre kuchárky -->
+            <section id="orders-view" class="view">
+                <div class="orders-panel">
+                    <div class="orders-header">
+                        <h2>Objednávky</h2>
+                        <div class="day-filter">
+                            <label for="filter-day">Zobraziť deň:</label>
+                            <select id="filter-day">
+                                <option value="all">Všetky</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="orders-list" id="orders-list"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="app2.js"></script>
+</body>
+</html>
