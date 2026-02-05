@@ -418,6 +418,12 @@ textarea {
     font-size: 1rem;
 }
 
+.orders-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .day-filter {
     display: flex;
     align-items: center;
@@ -434,6 +440,77 @@ textarea {
     width: auto;
     padding: 8px 12px;
     font-size: 0.85rem;
+}
+
+.print-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.print-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    #print-area, #print-area * {
+        visibility: visible;
+    }
+    
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12pt;
+    }
+    
+    .print-table th,
+    .print-table td {
+        border: 1px solid #333;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    
+    .print-table th {
+        background: #f0f0f0;
+        font-weight: 600;
+    }
+    
+    .print-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .print-header h1 {
+        font-size: 18pt;
+        margin-bottom: 5px;
+    }
+    
+    .print-header p {
+        font-size: 12pt;
+        color: #666;
+    }
 }
 
 /* Orders List */

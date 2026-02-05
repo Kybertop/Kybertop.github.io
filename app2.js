@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initForm();
     initImageZoomDrag();
     initOrdersView();
+    initPrint();
     await loadOrders();
     startAutoRefresh();
 });
@@ -570,4 +571,236 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ==================== TLAČ ====================
+
+function initPrint() {
+    const printBtn = document.getElementById('print-btn');
+    if (printBtn) {
+        printBtn.addEventListener('click', openPrintDialog);
+    }
+}
+
+function openPrintDialog() {
+    const filterValue = document.getElementById('filter-day').value;
+    const days = getAvailableDays();
+    
+    // Filtruj objednávky
+    let filteredOrders = [...orders];
+    
+    if (filterValue !== 'all') {
+        filteredOrders = filteredOrders.filter(o => o.date === filterValue);
+    }
+    
+    if (filteredOrders.length === 0) {
+        showToast('Žiadne objednávky na tlač', 'error');
+        return;
+    }
+    
+    // Zoskup podľa dňa
+    const ordersByDay = {};
+    filteredOrders.forEach(order => {
+        const key = order.date || 'unknown';
+        if (!ordersByDay[key]) {
+            ordersByDay[key] = [];
+        }
+        ordersByDay[key].push(order);
+    });
+    
+    // Zoraď dni
+    const sortedDays = Object.keys(ordersByDay).sort();
+    
+    // Vytvor tlačový obsah
+    let printContent = `
+        <!DOCTYPE html>
+        <html lang="sk">
+        <head>
+            <meta charset="UTF-8">
+            <title>Objednávky obedov</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                    font-size: 11pt;
+                }
+                .print-header {
+                    text-align: center;
+                    margin-bottom: 25px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #333;
+                }
+                .print-header h1 {
+                    font-size: 18pt;
+                    margin-bottom: 5px;
+                }
+                .print-header p {
+                    font-size: 10pt;
+                    color: #666;
+                }
+                .day-section {
+                    margin-bottom: 25px;
+                }
+                .day-title {
+                    font-size: 14pt;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                    padding: 8px 12px;
+                    background: #f0f0f0;
+                    border-left: 4px solid #333;
+                }
+                .print-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 15px;
+                }
+                .print-table th,
+                .print-table td {
+                    border: 1px solid #ccc;
+                    padding: 8px 10px;
+                    text-align: left;
+                    vertical-align: top;
+                }
+                .print-table th {
+                    background: #f5f5f5;
+                    font-weight: 600;
+                    font-size: 10pt;
+                }
+                .print-table td {
+                    font-size: 10pt;
+                }
+                .print-table tr:nth-child(even) {
+                    background: #fafafa;
+                }
+                .col-num {
+                    width: 30px;
+                    text-align: center;
+                }
+                .col-name {
+                    width: 25%;
+                }
+                .col-soup {
+                    width: 15%;
+                }
+                .col-menu {
+                    width: 15%;
+                }
+                .col-time {
+                    width: 12%;
+                    text-align: center;
+                }
+                .col-note {
+                    width: auto;
+                }
+                .col-check {
+                    width: 50px;
+                    text-align: center;
+                }
+                .checkbox {
+                    width: 18px;
+                    height: 18px;
+                    border: 2px solid #333;
+                    display: inline-block;
+                }
+                .summary {
+                    margin-top: 10px;
+                    font-size: 10pt;
+                    color: #666;
+                }
+                @media print {
+                    body {
+                        padding: 10px;
+                    }
+                    .day-section {
+                        page-break-inside: avoid;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-header">
+                <h1>Objednávky obedov</h1>
+                <p>Vytlačené: ${new Date().toLocaleDateString('sk-SK')} ${new Date().toLocaleTimeString('sk-SK', {hour: '2-digit', minute: '2-digit'})}</p>
+            </div>
+    `;
+    
+    sortedDays.forEach(day => {
+        const dayOrders = ordersByDay[day];
+        const dayInfo = days.find(d => d.fullDateStr === day);
+        const dayTitle = dayInfo ? `${dayInfo.name} ${dayInfo.dateStr}` : formatDateFromStr(day);
+        
+        // Zoraď podľa času vyzdvihnutia
+        dayOrders.sort((a, b) => (a.pickupTime || '').localeCompare(b.pickupTime || ''));
+        
+        printContent += `
+            <div class="day-section">
+                <div class="day-title">${dayTitle}</div>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">#</th>
+                            <th class="col-name">Meno</th>
+                            <th class="col-soup">Polievka</th>
+                            <th class="col-menu">Menu</th>
+                            <th class="col-time">Čas</th>
+                            <th class="col-note">Poznámka</th>
+                            <th class="col-check">✓</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        dayOrders.forEach((order, index) => {
+            const soupText = order.soup === 'Bez' ? '—' : order.soup;
+            let pickupTime = order.pickupTime || '';
+            if (typeof pickupTime === 'string') {
+                if (pickupTime.includes('T')) {
+                    const timePart = pickupTime.split('T')[1];
+                    if (timePart) pickupTime = timePart.substring(0, 5);
+                } else if (pickupTime.includes(':')) {
+                    pickupTime = pickupTime.substring(0, 5);
+                }
+            }
+            
+            printContent += `
+                <tr>
+                    <td class="col-num">${index + 1}</td>
+                    <td class="col-name">${escapeHtml(order.firstName || '')} ${escapeHtml(order.lastName || '')}</td>
+                    <td class="col-soup">${soupText}</td>
+                    <td class="col-menu">Menu ${order.menu}</td>
+                    <td class="col-time">${pickupTime}</td>
+                    <td class="col-note">${escapeHtml(order.note || '')}</td>
+                    <td class="col-check"><span class="checkbox"></span></td>
+                </tr>
+            `;
+        });
+        
+        printContent += `
+                    </tbody>
+                </table>
+                <div class="summary">Celkom objednávok: ${dayOrders.length}</div>
+            </div>
+        `;
+    });
+    
+    printContent += `
+        </body>
+        </html>
+    `;
+    
+    // Otvor nové okno a tlač
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Počkaj na načítanie a spusti tlač
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
 }
