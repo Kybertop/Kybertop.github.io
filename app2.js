@@ -168,22 +168,32 @@ function getAvailableDays() {
     const days = [];
     const now = new Date();
     const currentHour = now.getHours();
-    const currentDayOfWeek = now.getDay();
     
-    const monday = new Date(now);
-    const diff = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-    monday.setDate(monday.getDate() + diff);
-    monday.setHours(0, 0, 0, 0);
+    // Získaj dnešný dátum bez času
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDayOfWeek = today.getDay(); // 0 = Nedeľa, 1 = Pondelok, ... 4 = Štvrtok
     
+    // Nájdi pondelok aktuálneho týždňa
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysFromMonday);
+    
+    console.log('=== getAvailableDays DEBUG ===');
+    console.log('Dnes:', today.toDateString(), 'deň v týždni:', currentDayOfWeek);
+    console.log('Pondelok týždňa:', monday.toDateString());
+    
+    // Generuj Po-Pi
     for (let i = 0; i < 5; i++) {
         const date = new Date(monday);
-        date.setDate(date.getDate() + i);
+        date.setDate(monday.getDate() + i);
         
         const dayOfWeek = date.getDay();
-        const isToday = date.toDateString() === now.toDateString();
-        const isPast = date < now && !isToday;
+        const isToday = date.getTime() === today.getTime();
+        const isPast = date < today;
         const isTodayAfterNoon = isToday && currentHour >= 12;
         const isDisabled = isPast || isTodayAfterNoon;
+        
+        console.log(`Deň ${i}: ${date.toDateString()}, dayOfWeek: ${dayOfWeek}, name: ${dayNames[dayOfWeek]}, isToday: ${isToday}`);
         
         days.push({
             date: date,
@@ -492,22 +502,20 @@ function normalizeDate(dateValue) {
 function getFilterDays() {
     const days = [];
     const now = new Date();
-    const currentDayOfWeek = now.getDay();
+    
+    // Získaj dnešný dátum bez času
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDayOfWeek = today.getDay();
     
     // Nájdi pondelok aktuálneho týždňa
-    const monday = new Date(now);
-    const diff = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-    monday.setDate(monday.getDate() + diff);
-    monday.setHours(0, 0, 0, 0);
-    
-    const today = new Date(now);
-    today.setHours(0, 0, 0, 0);
+    const daysFromMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysFromMonday);
     
     // Generuj dni od dnes do piatku
     for (let i = 0; i < 5; i++) {
         const date = new Date(monday);
-        date.setDate(date.getDate() + i);
-        date.setHours(0, 0, 0, 0);
+        date.setDate(monday.getDate() + i);
         
         // Preskakuj minulé dni (len dnes a budúce)
         if (date < today) continue;
