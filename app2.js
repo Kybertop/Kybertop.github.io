@@ -439,17 +439,53 @@ function updateDayFilter() {
     
     // Získaj dni od dnes do piatku (pre zobrazenie objednávok)
     const days = getFilterDays();
+    const today = getTodayString();
     
-    select.innerHTML = '<option value="all">Všetky</option><option value="today">Dnes</option>';
+    select.innerHTML = '<option value="all">Všetky</option>';
     
     days.forEach(day => {
         const option = document.createElement('option');
         option.value = day.fullDateStr;
-        option.textContent = `${day.name} ${day.dateStr}`;
+        
+        if (day.isToday) {
+            option.textContent = `★ ${day.name} ${day.dateStr} (Dnes)`;
+            option.style.color = '#2563eb';
+            option.style.fontWeight = 'bold';
+            option.selected = true; // Predvolene vyber dnes
+        } else {
+            option.textContent = `${day.name} ${day.dateStr}`;
+        }
+        
         select.appendChild(option);
     });
     
     select.addEventListener('change', renderOrders);
+}
+
+// Získaj dnešný dátum ako string YYYY-MM-DD
+function getTodayString() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+// Normalizuj dátum z rôznych formátov na YYYY-MM-DD
+function normalizeDate(dateValue) {
+    if (!dateValue) return '';
+    
+    // Ak je to už správny formát
+    if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+        return dateValue;
+    }
+    
+    // Ak je to Date objekt alebo ISO string
+    try {
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+    } catch (e) {}
+    
+    return String(dateValue);
 }
 
 // Dni pre filter objednávok (od dnes do piatku)
@@ -494,31 +530,34 @@ function getFilterDays() {
 function renderOrders() {
     const container = document.getElementById('orders-list');
     const filterValue = document.getElementById('filter-day').value;
+    const today = getTodayString();
     
-    console.log('Filter:', filterValue);
+    console.log('=== DEBUG ===');
+    console.log('Filter hodnota:', filterValue);
+    console.log('Dnešný dátum:', today);
     console.log('Všetky objednávky:', orders);
     
-    // Získaj dnešný dátum
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    // Normalizuj dátumy v objednávkach
+    let filteredOrders = orders.map(o => ({
+        ...o,
+        normalizedDate: normalizeDate(o.date)
+    }));
     
-    let filteredOrders = [...orders];
+    console.log('Objednávky s normalizovanými dátumami:', filteredOrders.map(o => ({ id: o.id, date: o.date, normalizedDate: o.normalizedDate })));
     
     // Filtruj len objednávky od dnes (nie minulé)
-    filteredOrders = filteredOrders.filter(o => o.date >= today);
+    filteredOrders = filteredOrders.filter(o => o.normalizedDate >= today);
     
     // Aplikuj filter
-    if (filterValue === 'today') {
-        filteredOrders = filteredOrders.filter(o => o.date === today);
-    } else if (filterValue !== 'all') {
-        filteredOrders = filteredOrders.filter(o => o.date === filterValue);
+    if (filterValue !== 'all') {
+        filteredOrders = filteredOrders.filter(o => o.normalizedDate === filterValue);
     }
     
     console.log('Filtrované objednávky:', filteredOrders);
     
     filteredOrders.sort((a, b) => {
-        if (a.date !== b.date) {
-            return a.date.localeCompare(b.date);
+        if (a.normalizedDate !== b.normalizedDate) {
+            return a.normalizedDate.localeCompare(b.normalizedDate);
         }
         return (a.pickupTime || '').localeCompare(b.pickupTime || '');
     });
@@ -639,19 +678,17 @@ function initPrint() {
 function openPrintDialog() {
     const filterValue = document.getElementById('filter-day').value;
     const days = getFilterDays();
+    const today = getTodayString();
     
-    // Získaj dnešný dátum
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    
-    // Filtruj objednávky (len od dnes)
-    let filteredOrders = orders.filter(o => o.date >= today);
+    // Normalizuj a filtruj objednávky (len od dnes)
+    let filteredOrders = orders.map(o => ({
+        ...o,
+        normalizedDate: normalizeDate(o.date)
+    })).filter(o => o.normalizedDate >= today);
     
     // Aplikuj filter
-    if (filterValue === 'today') {
-        filteredOrders = filteredOrders.filter(o => o.date === today);
-    } else if (filterValue !== 'all') {
-        filteredOrders = filteredOrders.filter(o => o.date === filterValue);
+    if (filterValue !== 'all') {
+        filteredOrders = filteredOrders.filter(o => o.normalizedDate === filterValue);
     }
     
     if (filteredOrders.length === 0) {
@@ -662,7 +699,7 @@ function openPrintDialog() {
     // Zoskup podľa dňa
     const ordersByDay = {};
     filteredOrders.forEach(order => {
-        const key = order.date || 'unknown';
+        const key = order.normalizedDate || order.date || 'unknown';
         if (!ordersByDay[key]) {
             ordersByDay[key] = [];
         }
