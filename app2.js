@@ -436,9 +436,11 @@ function initOrdersView() {
 
 function updateDayFilter() {
     const select = document.getElementById('filter-day');
-    const days = getAvailableDays();
     
-    select.innerHTML = '<option value="all">Všetky</option>';
+    // Získaj dni od dnes do piatku (pre zobrazenie objednávok)
+    const days = getFilterDays();
+    
+    select.innerHTML = '<option value="all">Všetky</option><option value="today">Dnes</option>';
     
     days.forEach(day => {
         const option = document.createElement('option');
@@ -450,17 +452,69 @@ function updateDayFilter() {
     select.addEventListener('change', renderOrders);
 }
 
+// Dni pre filter objednávok (od dnes do piatku)
+function getFilterDays() {
+    const days = [];
+    const now = new Date();
+    const currentDayOfWeek = now.getDay();
+    
+    // Nájdi pondelok aktuálneho týždňa
+    const monday = new Date(now);
+    const diff = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+    monday.setDate(monday.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+    
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    
+    // Generuj dni od dnes do piatku
+    for (let i = 0; i < 5; i++) {
+        const date = new Date(monday);
+        date.setDate(date.getDate() + i);
+        date.setHours(0, 0, 0, 0);
+        
+        // Preskakuj minulé dni (len dnes a budúce)
+        if (date < today) continue;
+        
+        const dayOfWeek = date.getDay();
+        
+        days.push({
+            date: date,
+            dayOfWeek: dayOfWeek,
+            name: dayNames[dayOfWeek],
+            dateStr: formatDate(date),
+            fullDateStr: formatFullDate(date),
+            isToday: date.getTime() === today.getTime()
+        });
+    }
+    
+    return days;
+}
+
 function renderOrders() {
     const container = document.getElementById('orders-list');
     const filterValue = document.getElementById('filter-day').value;
     
+    console.log('Filter:', filterValue);
     console.log('Všetky objednávky:', orders);
+    
+    // Získaj dnešný dátum
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     
     let filteredOrders = [...orders];
     
-    if (filterValue !== 'all') {
+    // Filtruj len objednávky od dnes (nie minulé)
+    filteredOrders = filteredOrders.filter(o => o.date >= today);
+    
+    // Aplikuj filter
+    if (filterValue === 'today') {
+        filteredOrders = filteredOrders.filter(o => o.date === today);
+    } else if (filterValue !== 'all') {
         filteredOrders = filteredOrders.filter(o => o.date === filterValue);
     }
+    
+    console.log('Filtrované objednávky:', filteredOrders);
     
     filteredOrders.sort((a, b) => {
         if (a.date !== b.date) {
@@ -584,12 +638,19 @@ function initPrint() {
 
 function openPrintDialog() {
     const filterValue = document.getElementById('filter-day').value;
-    const days = getAvailableDays();
+    const days = getFilterDays();
     
-    // Filtruj objednávky
-    let filteredOrders = [...orders];
+    // Získaj dnešný dátum
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     
-    if (filterValue !== 'all') {
+    // Filtruj objednávky (len od dnes)
+    let filteredOrders = orders.filter(o => o.date >= today);
+    
+    // Aplikuj filter
+    if (filterValue === 'today') {
+        filteredOrders = filteredOrders.filter(o => o.date === today);
+    } else if (filterValue !== 'all') {
         filteredOrders = filteredOrders.filter(o => o.date === filterValue);
     }
     
