@@ -482,18 +482,30 @@ function getTodayString() {
 function normalizeDate(dateValue) {
     if (!dateValue) return '';
     
-    // Ak je to už správny formát
+    // Ak je to už správny formát YYYY-MM-DD
     if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
         return dateValue;
     }
     
-    // Ak je to Date objekt alebo ISO string
+    // Ak je to ISO string (napr. 2026-02-05T00:00:00.000Z)
+    if (typeof dateValue === 'string' && dateValue.includes('T')) {
+        // Vezmi len dátumovú časť pred T
+        return dateValue.split('T')[0];
+    }
+    
+    // Ak je to Date objekt alebo niečo čo sa dá parsovať
     try {
         const date = new Date(dateValue);
         if (!isNaN(date.getTime())) {
-            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            // Použij UTC metódy aby sa predišlo problémom s časovou zónou
+            const year = date.getUTCFullYear();
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('Chyba pri normalizácii dátumu:', e);
+    }
     
     return String(dateValue);
 }
@@ -597,10 +609,16 @@ function renderOrders() {
             }
         }
         
+        // Použi normalizovaný dátum pre zobrazenie
+        const displayDate = order.normalizedDate || order.date;
+        const formattedDate = formatDateFromStr(displayDate);
+        
+        console.log('Objednávka:', order.firstName, '- pôvodný dátum:', order.date, '- normalizovaný:', order.normalizedDate, '- zobrazený:', formattedDate);
+        
         return `
             <div class="order-card ${order.completed ? 'completed' : ''}" data-id="${order.id}">
                 <div class="order-info">
-                    <div class="order-day-badge">${order.dayName || ''} ${order.date ? formatDateFromStr(order.date) : ''}</div>
+                    <div class="order-day-badge">${order.dayName || ''} ${formattedDate}</div>
                     <div class="order-name">${escapeHtml(order.firstName || '')} ${escapeHtml(order.lastName || '')}</div>
                     <div class="order-details">${soupText} • Menu ${order.menu}</div>
                     ${order.note ? `<div class="order-note">Poznámka: ${escapeHtml(order.note)}</div>` : ''}
@@ -624,9 +642,29 @@ function renderOrders() {
     }).join('');
 }
 
-function formatDateFromStr(dateStr) {
-    const parts = dateStr.split('-');
-    return `${parseInt(parts[2])}.${parseInt(parts[1])}.`;
+function formatDateFromStr(dateValue) {
+    if (!dateValue) return '';
+    
+    let dateStr = dateValue;
+    
+    // Ak je to Date objekt alebo ISO string s časom
+    if (dateValue instanceof Date || (typeof dateValue === 'string' && dateValue.includes('T'))) {
+        const date = new Date(dateValue);
+        if (!isNaN(date.getTime())) {
+            return `${date.getDate()}.${date.getMonth() + 1}.`;
+        }
+    }
+    
+    // Ak je to string v formáte YYYY-MM-DD
+    if (typeof dateStr === 'string' && dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return `${parseInt(parts[2])}.${parseInt(parts[1])}.`;
+        }
+    }
+    
+    // Fallback
+    return String(dateValue);
 }
 
 async function toggleComplete(id) {
