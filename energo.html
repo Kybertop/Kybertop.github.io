@@ -3,258 +3,626 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- HTML Meta Tags -->
-  <title>Hesko | Energo</title>
-  <meta name="description" content=":D">
-  
-  <!-- Facebook Meta Tags -->
-  <meta property="og:url" content="https://hesko.cc">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Hesko | Energo">
-  <meta property="og:description" content=":D">
-  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/083bc665-88a5-4ffa-8553-c3903d434efc.png?token=DYsukwGFWC1hLEtgBCVUoQuTCNOaNlbZENx7swdFGUs&height=1200&width=1200&expires=33293578594">
-  
-  <!-- Twitter Meta Tags -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta property="twitter:domain" content="hesko.cc">
-  <meta property="twitter:url" content="https://hesko.cc">
-  <meta name="twitter:title" content="Hesko | Energo">
-  <meta name="twitter:description" content=":D">
-  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/083bc665-88a5-4ffa-8553-c3903d434efc.png?token=DYsukwGFWC1hLEtgBCVUoQuTCNOaNlbZENx7swdFGUs&height=1200&width=1200&expires=33293578594">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='black'/%3E%3Cpath d='M12 40h12l4-16 8 24 6-16h10' stroke='white' stroke-width='4' fill='none'/%3E%3Cpath d='M8 20h16' stroke='%23ff1a1a' stroke-width='4'/%3E%3C/svg%3E" />
-  <link rel="preload" href="styles.css" as="style">
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="app.js"></script>
-  <script defer src="mc.js"></script>
-  <script defer src="cas.js"></script>
-  <script defer src="breaks.modal.js"></script>
+  <title>Energo</title>
+  <meta name="description" content="Prestávky a kontakt – Energo">
+  <meta property="og:title" content="Energo">
+  <meta property="og:description" content="Prestávky a kontakt">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Cpath d='M32 8L18 36h10l-4 20 18-28H32l4-20z' fill='%23e11d2e'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08080a;
+      --surface: #0e0e11;
+      --surface-2: #131316;
+      --border: #1a1a1f;
+      --border-light: #242429;
+      --text: #e8e8ec;
+      --text-2: #9898a0;
+      --accent: #e11d2e;
+      --accent-dim: rgba(225, 29, 46, .12);
+      --green: #22c55e;
+      --green-dim: rgba(34, 197, 94, .12);
+      --radius: 16px;
+      --font: 'Outfit', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+
+    body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== HEADER ========== */
+    header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 8, 10, .8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .brand-name {
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: .5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-link {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--font);
+      transition: color .15s, background .15s;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+
+    /* ========== MAIN ========== */
+    main {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    section {
+      display: none;
+      padding: 48px 0 64px;
+      animation: fadeUp .3s ease;
+    }
+
+    section.visible {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== CLOCK HERO ========== */
+    .clock-hero {
+      text-align: center;
+      padding: 40px 0 48px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+
+    .clock-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .clock-time {
+      font-family: var(--mono);
+      font-size: clamp(48px, 10vw, 72px);
+      font-weight: 700;
+      letter-spacing: 2px;
+      line-height: 1;
+      background: linear-gradient(180deg, #fff 30%, #888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .clock-date {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-top: 10px;
+      font-weight: 300;
+    }
+
+    /* ========== SCHEDULE COLUMNS ========== */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 700px) {
+      .schedule-grid { grid-template-columns: 1fr; }
+    }
+
+    .schedule-col {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color .2s;
+    }
+
+    .schedule-col.is-active {
+      border-color: rgba(34, 197, 94, .35);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, .1);
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .col-title {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+      transition: background .2s;
+    }
+
+    .status-dot.on {
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(34, 197, 94, .5);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-2);
+    }
+
+    .status-badge.on {
+      border-color: rgba(34, 197, 94, .3);
+      background: var(--green-dim);
+      color: var(--green);
+    }
+
+    .status-badge.on .status-dot {
+      background: var(--green);
+      box-shadow: 0 0 6px rgba(34, 197, 94, .4);
+    }
+
+    .next-info {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 14px;
+      font-weight: 300;
+    }
+
+    .break-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .break-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid transparent;
+      transition: border-color .15s, background .15s;
+    }
+
+    .break-item .time {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .break-item .label {
+      font-size: 12px;
+      color: var(--text-2);
+      font-weight: 500;
+    }
+
+    .break-item.current {
+      border-color: rgba(34, 197, 94, .35);
+      background: var(--green-dim);
+    }
+
+    .break-item.current .time {
+      color: var(--green);
+    }
+
+    .break-item.next {
+      border-color: rgba(225, 29, 46, .25);
+      background: var(--accent-dim);
+    }
+
+    .break-item.next .time {
+      color: var(--accent);
+    }
+
+    /* ========== CONTACT ========== */
+    .contact-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color .15s;
+    }
+
+    .contact-card:hover {
+      border-color: var(--accent);
+    }
+
+    .contact-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .contact-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .contact-icon svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-2);
+    }
+
+    .contact-name {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .contact-value {
+      font-size: 13px;
+      color: var(--text-2);
+      font-weight: 300;
+    }
+
+    .contact-arrow {
+      color: var(--text-2);
+      font-size: 18px;
+      transition: transform .15s;
+    }
+
+    .contact-card:hover .contact-arrow {
+      transform: translateX(3px);
+    }
+
+    .section-heading {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .discord-widget-wrap {
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .discord-widget-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 400px;
+      border: none;
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      text-align: center;
+      padding: 24px 20px 32px;
+      border-top: 1px solid var(--border);
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 300;
+    }
+
+    footer .accent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ========== MISC ========== */
+    @media (max-width: 500px) {
+      header { padding: 16px; }
+      .nav-link { padding: 8px 10px; font-size: 13px; }
+      .brand-name { font-size: 16px; }
+      main { padding: 0 16px; }
+      .clock-hero { padding: 28px 0 36px; margin-bottom: 28px; }
+    }
+  </style>
 </head>
 <body>
+
   <header>
-    <div class="container nav">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3 15h6l3-10 4 15 3-9h2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="title">Energo</span>
-      </div>
-
-      <!-- Desktop tabs -->
-      <nav class="tabs" role="navigation" aria-label="Hlavná navigácia">
-        <a class="tab" href="#home" data-route>Domov</a>
-        <a class="tab" href="#notes" data-route>Poznámky</a>
-        <a class="tab" href="#contact" data-route>Kontakt</a>
-        <a class="tab" href="#minecraft" data-route>Minecraft</a>
-      </nav>
-
-      <!-- Upload always visible -->
-      <div class="actions">
-        <button id="btnUpload" class="btn small" type="button">Poslať prácu</button>
-      </div>
-
-      <!-- Hamburger (mobile) -->
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobilePanel">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#0e0e11"/>
+        <path d="M16 4L9 18h5l-2 10 9-14h-5l2-10z" fill="#e11d2e"/>
+      </svg>
+      <span class="brand-name">Energo</span>
     </div>
-
-    <!-- Mobile panel -->
-    <div class="mobile-panel" id="mobilePanel" hidden>
-      <div class="mobile-list container">
-        <a class="tab" href="#home" data-route>Domov</a>
-        <a class="tab" href="#notes" data-route>Poznámky</a>
-        <a class="tab" href="#contact" data-route>Kontakt</a>
-        <a class="tab" href="#minecraft" data-route>Minecraft</a>
-        <!-- Upload button úmyselne nie je v menu -->
-      </div>
-    </div>
+    <nav class="nav-links">
+      <button class="nav-link active" data-nav="prestavky">Prestávky</button>
+      <button class="nav-link" data-nav="kontakt">Kontakt</button>
+    </nav>
   </header>
 
-  <main class="container">
-    <!-- ===== HOME ===== -->
-    <section id="home" data-page>
-      <div class="hero">
-        <div class="hero-wrap">
-          <div class="hero-card">
-            <h1>Všetky poznámky na jednom mieste.</h1>
-            <p>Rozdelené pre odbory <strong>MPS</strong> (C triedy) a <strong>TITT</strong> (G triedy). Rýchlo nájdeš, čo potrebuješ – bez zdržovania, v modernom a prehľadnom dizajne.</p>
-            <div class="quick" aria-label="Rýchly výber">
-              <button class="chip" data-jump='{"dept":"MPS","class":"1.C"}'>MPS • 1.C</button>
-              <button class="chip" data-jump='{"dept":"MPS","class":"2.C"}'>MPS • 2.C</button>
-              <button class="chip" data-jump='{"dept":"MPS","class":"3.C"}'>MPS • 3.C</button>
-              <button class="chip" data-jump='{"dept":"TITT","class":"2.G"}'>TITT • 2.G</button>
-              <a class="chip ghost" href="#notes">Všetky poznámky</a>
+  <main>
+    <!-- ===== PRESTAVKY ===== -->
+    <section id="prestavky" class="visible">
+      <div class="clock-hero">
+        <div class="clock-label">Aktuálny čas</div>
+        <div class="clock-time" id="clock">--:--:--</div>
+        <div class="clock-date" id="clockDate"></div>
+      </div>
+
+      <div class="section-heading">Rozpis prestávok</div>
+      <div class="schedule-grid" id="scheduleGrid">
+        <!-- rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ===== KONTAKT ===== -->
+    <section id="kontakt">
+      <div class="section-heading">Kontakt</div>
+      <div class="contact-grid">
+
+        <a class="contact-card" href="https://discord.gg/mtnjZ6vqsE" target="_blank" rel="noopener noreferrer">
+          <div class="contact-left">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+            </div>
+            <div>
+              <div class="contact-name">Discord</div>
+              <div class="contact-value">discord.gg/mtnjZ6vqsE</div>
             </div>
           </div>
-          <div class="hero-card hero-cta">
-            <h2 style="margin:0 0 8px">Potrebuješ odovzdať prácu?</h2>
-            <p class="muted">Klikni na <strong>Poslať prácu</strong> hore vpravo. Príloha sa odošle do nášho Discordu do miestnosti podľa triedy.</p>
-            <ul class="bullets">
-              <li>Vyber triedu (1.C • 2.C • 3.C • 2.G)</li>
-              <li>Napíš <em>Meno + Priezvisko</em></li>
-              <li>Prilož súbor a odošli</li>
-            </ul>
+          <span class="contact-arrow">&rsaquo;</span>
+        </a>
+
+        <a class="contact-card" href="mailto:pato@hesko.cc">
+          <div class="contact-left">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
+            </div>
+            <div>
+              <div class="contact-name">E-mail</div>
+              <div class="contact-value">pato@hesko.cc</div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
+          <span class="contact-arrow">&rsaquo;</span>
+        </a>
 
-    <!-- ===== NOTES ===== -->
-    <section id="notes" data-page class="hide">
-      <div class="section-title">
-        <h2>Poznámky</h2>
-        <div class="toolbar" role="group" aria-label="Filtre">
-          <div class="toggles" role="group" aria-label="Odbor prepínač">
-            <button class="toggle" data-dept="" aria-pressed="true">Všetko</button>
-            <button class="toggle" data-dept="MPS">MPS</button>
-            <button class="toggle" data-dept="TITT">TITT</button>
-          </div>
-          <select id="dept" class="select" aria-label="Odbor">
-            <option value="">Odbor: všetko</option>
-            <option value="MPS">MPS (C triedy)</option>
-            <option value="TITT">TITT (G triedy)</option>
-          </select>
-          <select id="klass" class="select" aria-label="Trieda">
-            <option value="">Trieda: všetko</option>
-            <option value="1.C">1.C</option>
-            <option value="2.C">2.C</option>
-            <option value="3.C">3.C</option>
-            <option value="2.G">2.G</option>
-          </select>
-          <input id="query" class="input" type="search" placeholder="Hľadať podľa názvu alebo tagu…" aria-label="Hľadať" />
-          <button id="clear" class="btn ghost" type="button">Vyčistiť</button>
-        </div>
-      </div>
-
-      <div id="notesWrap"></div>
-      <div id="emptyState" class="empty hide">Žiadne výsledky. Skús upraviť filtre alebo hľadanie.</div>
-    </section>
-
-    <!-- ===== CONTACT ===== -->
-    <section id="contact" data-page class="hide">
-      <div class="columns">
-        <div class="card">
-          <div class="section-title"><h2>Kontakt</h2></div>
-          <div class="list">
-            <a href="https://discord.gg/mtnjZ6vqsE" target="_blank" rel="noopener noreferrer">
-              <span>Discord</span>
-              <span class="kbd">Energo - discord.gg/mtnjZ6vqsE</span>
-            </a>
-            <a href="mailto:pato@hesko.cc">
-              <span>E‑mail</span>
-              <span class="kbd">pato@hesko.cc</span>
-            </a>
-            <div class="list-row">
-              <span>EduPage</span>
-              <span class="kbd">Patrik Hesko</span>
+        <div class="contact-card" style="cursor:default">
+          <div class="contact-left">
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div class="contact-name">EduPage</div>
+              <div class="contact-value">Patrik Hesko</div>
             </div>
           </div>
         </div>
-        <div class="card" aria-label="Discord widget">
-          <div class="section-title"><h2>Discord – pridaj sa</h2></div>
-          <iframe src="https://discord.com/widget?id=1251854428827422790&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts" style="width:100%; height:440px; border-radius:12px"></iframe>
-          <noscript><p>Na zobrazenie Discord widgetu povoľ JavaScript.</p></noscript>
-        </div>
+      </div>
+
+      <div class="discord-widget-wrap">
+        <iframe src="https://discord.com/widget?id=1251854428827422790&theme=dark" allowtransparency="true" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
       </div>
     </section>
-  
-    <!-- ===== MINECRAFT ===== -->
-    <section id="minecraft" data-page class="hide">
-      <div class="section-title">
-        <h2>Minecraft</h2>
-        <div class="toolbar">
-          <button class="btn small" id="mcRefresh" type="button">Obnoviť</button>
-        </div>
-      </div>
-      <div class="columns">
-        <div class="card">
-          <h3 style="margin-top:0">Info o serveri</h3>
-          <div class="list">
-            <div class="list-row">
-              <span>IP adresa</span>
-              <div style="display:flex;align-items:center;gap:10px">
-                <code class="kbd" id="mcIpText">energo.ddns.net:443</code>
-                <button class="btn small" id="mcCopy" type="button">Kopírovať</button>
-              </div>
+  </main>
+
+  <footer>
+    <span class="accent">&#9889;</span> Energo &middot; &copy; <span id="year"></span>
+  </footer>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // ===== NAV =====
+    const navBtns = document.querySelectorAll('[data-nav]');
+    const sections = document.querySelectorAll('main > section');
+
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.nav;
+        navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sections.forEach(s => {
+          s.classList.toggle('visible', s.id === target);
+        });
+      });
+    });
+
+    // ===== CLOCK =====
+    const TZ = 'Europe/Bratislava';
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('clockDate');
+    const yearEl = document.getElementById('year');
+
+    const fmtTime = new Intl.DateTimeFormat('sk-SK', { timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const fmtDate = new Intl.DateTimeFormat('sk-SK', { timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    yearEl.textContent = new Date().getFullYear();
+
+    // ===== SCHEDULE DATA =====
+    const SCHEDULES = {
+      teoria: {
+        title: 'Teória',
+        breaks: [
+          { start: '07:50', end: '07:55', label: 'Krátka' },
+          { start: '08:40', end: '08:45', label: 'Krátka' },
+          { start: '09:30', end: '09:45', label: 'Dlhá' },
+          { start: '10:30', end: '10:35', label: 'Krátka' },
+          { start: '11:20', end: '11:25', label: 'Krátka' },
+          { start: '12:10', end: '12:40', label: 'Obedová' },
+          { start: '13:25', end: '13:30', label: 'Krátka' },
+          { start: '14:35', end: '14:40', label: 'Krátka' },
+          { start: '15:45', end: '15:50', label: 'Krátka' },
+        ]
+      },
+      prax: {
+        title: 'Prax',
+        breaks: [
+          { start: '09:05', end: '09:20', label: 'Prestávka' },
+          { start: '12:45', end: '13:15', label: 'Obedová' },
+        ]
+      },
+      prax_teoria: {
+        title: 'Prax (teória)',
+        breaks: [
+          { start: '09:20', end: '09:35', label: 'Prestávka' },
+          { start: '12:45', end: '13:15', label: 'Obedová' },
+        ]
+      }
+    };
+
+    // ===== HELPERS =====
+    const toMin = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+    const nowMinTZ = () => {
+      const parts = fmtTime.formatToParts(new Date());
+      const h = +parts.find(p => p.type === 'hour').value;
+      const m = +parts.find(p => p.type === 'minute').value;
+      return h * 60 + m;
+    };
+    const diffStr = mins => {
+      if (mins <= 0) return 'o chvíľu';
+      if (mins < 60) return `za ${mins} min`;
+      const h = Math.floor(mins / 60), m = mins % 60;
+      return m ? `za ${h}h ${m}min` : `za ${h}h`;
+    };
+
+    // ===== RENDER =====
+    const grid = document.getElementById('scheduleGrid');
+
+    function render() {
+      const now = new Date();
+      clockEl.textContent = fmtTime.format(now);
+      dateEl.textContent = fmtDate.format(now);
+
+      const nowM = nowMinTZ();
+
+      grid.innerHTML = Object.entries(SCHEDULES).map(([key, sched]) => {
+        let current = null, next = null;
+
+        for (const b of sched.breaks) {
+          const s = toMin(b.start), e = toMin(b.end);
+          if (nowM >= s && nowM < e) { current = { ...b, s, e }; break; }
+          if (s > nowM && (!next || s < toMin(next.start))) next = { ...b, s, e };
+        }
+
+        const isActive = !!current;
+        const statusText = isActive ? (current.label + ' prestávka') : 'Mimo prestávky';
+        const nextText = !isActive && next
+          ? `Najbližšia o ${next.start} (${diffStr(next.s - nowM)})`
+          : (!isActive ? 'Dnes už bez prestávky' : '');
+
+        const breakItems = sched.breaks.map(b => {
+          const s = toMin(b.start);
+          const e = toMin(b.end);
+          let cls = '';
+          if (current && s === current.s) cls = 'current';
+          else if (!current && next && s === next.s) cls = 'next';
+
+          return `<div class="break-item ${cls}">
+            <span class="time">${b.start} – ${b.end}</span>
+            <span class="label">${b.label}</span>
+          </div>`;
+        }).join('');
+
+        return `
+          <div class="schedule-col ${isActive ? 'is-active' : ''}">
+            <div class="col-header">
+              <span class="col-title">${sched.title}</span>
+              <span class="status-dot ${isActive ? 'on' : ''}"></span>
             </div>
-            <a href="http://energo.ddns.net:7777" target="_blank" rel="noopener noreferrer">
-              <span>Live mapa</span>
-              <span class="kbd">energo.ddns.net:7777</span>
-            </a>
-          </div>
-          <div style="margin-top:14px" id="mcStatusWrap">
-            <div class="muted" id="mcStatusText">Načítavam stav servera…</div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-title"><h3 style="margin:0">Online hráči</h3></div>
-          <div id="mcPlayers" class="mc-players-grid"></div>
-          <div id="mcPlayersEmpty" class="muted">Nikto nie je online.</div>
-        </div>
-        <!-- Recommended mods card sa doplní dynamicky z mc.js -->
-      </div>
-    </section>
-    </main>
+            <div class="status-badge ${isActive ? 'on' : ''}">
+              <span class="status-dot ${isActive ? 'on' : ''}"></span>
+              ${statusText}
+            </div>
+            ${nextText ? `<div class="next-info">${nextText}</div>` : ''}
+            <div class="break-list">${breakItems}</div>
+          </div>`;
+      }).join('');
+    }
 
-<footer>
-  <div class="container foot">
-    <div class="sig"><svg class="bolt" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg> Energo je cesta</div>
-
-    <div id="breakWidget" class="break-widget" aria-live="polite">
-      <span id="bwTime" class="bw-time">--:--:--</span>
-      <span id="bwLabel" class="bw-badge">Mimo prestávky</span>
-    </div>
-
-    <div class="copy">© <span id="year"></span> Energo</div>
-  </div>
-</footer>
-
-
-  <!-- ===== Upload modal (dialog) ===== -->
-  <dialog id="uploadDialog">
-    <form id="uploadForm" method="post" enctype="multipart/form-data" target="uploadTarget">
-      <h3>Poslať prácu na Discord</h3>
-      <p class="muted">Súbor bude odoslaný do miestnosti podľa triedy.</p>
-
-      <label class="field">Trieda
-        <select name="class" id="uClass" required>
-          <option value="" disabled selected>Vyber triedu…</option>
-          <option value="1.C">1.C (MPS)</option>
-          <option value="2.C">2.C (MPS)</option>
-          <option value="3.C">3.C (MPS)</option>
-          <option value="2.G">2.G (TITT)</option>
-        </select>
-      </label>
-
-      <div class="grid2">
-        <label class="field">Meno
-          <input type="text" id="uName" placeholder="Ján" required>
-        </label>
-        <label class="field">Priezvisko
-          <input type="text" id="uSurname" placeholder="Novák" required>
-        </label>
-      </div>
-
-      <label class="field">Poznámka (voliteľné)
-        <input type="text" id="uNote" placeholder="Napr. úloha č. 3">
-      </label>
-
-      <label class="field">Súbor
-        <input type="file" name="files[0]" id="uFile" required>
-      </label>
-
-      <input type="hidden" name="payload_json" id="payload" />
-
-      <div class="dialog-actions">
-        <button type="button" class="btn ghost" id="cancelUpload">Zrušiť</button>
-        <button type="submit" class="btn" id="sendUpload">Odoslať</button>
-      </div>
-    </form>
-    <iframe name="uploadTarget" id="uploadTarget" class="hidden"></iframe>
-  </dialog>
+    render();
+    setInterval(render, 1000);
+  })();
+  </script>
 </body>
 </html>
