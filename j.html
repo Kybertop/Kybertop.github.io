@@ -624,7 +624,9 @@
     }
 
     fig.addEventListener('click', openLB);
-    lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
+    lb.addEventListener('click', e => {
+      if (e.target === lb || e.target === viewport || e.target.classList.contains('lb-hint')) closeLB();
+    });
 
     viewport.addEventListener('wheel', e => {
       e.preventDefault();
