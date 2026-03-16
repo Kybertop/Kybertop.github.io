@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const MENU_PAGE_URL = 'https://ucm.top-relax.sk/';
-const OUTPUT_DIR = path.join(__dirname, '..', 'assets', 'menu');
+const OUTPUT_DIR = path.join(__dirname, '..', 'assets');
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'menu.png');
 
 function fetch(url) {
