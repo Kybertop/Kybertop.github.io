@@ -421,7 +421,7 @@
         </div>
         <div class="menu-error" id="menuError">Nepodarilo sa nacitat jedalny listok.</div>
         <div class="menu-actions">
-          <a class="btn-open" id="openFull" href="/assets/menu.png" target="_blank" rel="noopener">Otvorit original</a>
+          <a class="btn-open" id="openFull" href="assets/menu.png" target="_blank" rel="noopener">Otvorit original</a>
         </div>
       </div>
 
@@ -505,8 +505,7 @@
     setInterval(tickCountdown, 1000);
 
     // ===== MENU IMAGE =====
-    const today = new Date().toISOString().slice(0, 10);
-    const base = '/assets/menu.png';
+    const base = 'assets/menu.png';
 
     const img = document.getElementById('menuImg');
     const fig = document.getElementById('menuFigure');
@@ -514,7 +513,7 @@
     const openFull = document.getElementById('openFull');
     const menuError = document.getElementById('menuError');
 
-    img.src = base + '?v=' + today;
+    img.src = base;
 
     function markLoaded() { fig.classList.add('loaded'); }
     if (img.complete && img.naturalWidth) markLoaded();
@@ -533,10 +532,10 @@
         const full = (d && d.img) || base;
         const dt = new Date((d && d.fetchedAt) || Date.now());
         updatedEl.textContent = 'Aktualizovane ' + dt.toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
-        openFull.href = full + '?v=' + today;
-        img.dataset.full = full + '?v=' + today;
+        openFull.href = full;
+        img.dataset.full = full;
       })
-      .catch(() => { img.dataset.full = base + '?v=' + today; });
+      .catch(() => { img.dataset.full = base; });
 
     // ===== LIGHTBOX =====
     const lb = document.getElementById('lb');
