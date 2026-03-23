@@ -2,7 +2,7 @@ name: Update menu image
 
 on:
   schedule:
-    - cron: '15 4 * * *'   # denne ~06:15 CET/CEST
+    - cron: '15 4 * * 1'   # pondelok ~06:15 CET/CEST
   workflow_dispatch:
 
 permissions:
@@ -18,15 +18,7 @@ jobs:
         with:
           node-version: 20
 
-      # stačí nám cheerio, netreba package.json
-      - name: Install Cheerio
-        run: npm i cheerio@^1 --no-save
-
-      - name: Run fetcher
-        env:
-          SOURCE_URL: ${{ secrets.SOURCE_URL }}
-          SELECTOR: '#jedalnylistok .vc_single_image-wrapper img, #jedalnylistok img'
-          OUTPUT_PATH: assets/menu.jpg
+      - name: Fetch menu image
         run: node scripts/fetch_menu.js
 
       - name: Commit & push if changed
