@@ -440,7 +440,7 @@
     <span class="accent">&#9889;</span> Energo &middot; &copy; <span id="year"></span>
   </footer>
 
-  <script>
+<script>
   (() => {
     'use strict';
 
@@ -475,7 +475,6 @@
       const diff = lunchSec - nowSec;
 
       if (diff > 0) {
-        // before lunch
         const dh = Math.floor(diff / 3600);
         const dm = Math.floor((diff % 3600) / 60);
         const ds = diff % 60;
@@ -484,7 +483,6 @@
         cdBadge.className = 'countdown-badge';
         cdStatus.textContent = 'Caka sa';
       } else if (diff >= -1800) {
-        // lunch break active (12:45 - 13:15 = 30 min)
         const left = 1800 + diff;
         const lm = Math.floor(left / 60);
         const ls = left % 60;
@@ -493,7 +491,6 @@
         cdBadge.className = 'countdown-badge active';
         cdStatus.textContent = 'Prave teraz';
       } else {
-        // after lunch
         cdTime.textContent = '00:00:00';
         cdLabel.textContent = 'Obed skoncil';
         cdBadge.className = 'countdown-badge over';
@@ -513,7 +510,8 @@
     const openFull = document.getElementById('openFull');
     const menuError = document.getElementById('menuError');
 
-    img.src = base;
+    // cache-bust so we always get the latest image
+    img.src = base + '?t=' + Date.now();
 
     function markLoaded() { fig.classList.add('loaded'); }
     if (img.complete && img.naturalWidth) markLoaded();
@@ -525,17 +523,21 @@
       menuError.style.display = 'block';
     });
 
-    // try to load metadata
+    // set dataset.full immediately as fallback
+    img.dataset.full = base;
+
     fetch(base + '.json', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        const full = (d && d.img) || base;
-        const dt = new Date((d && d.fetchedAt) || Date.now());
-        updatedEl.textContent = 'Aktualizovane ' + dt.toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
-        openFull.href = full;
-        img.dataset.full = full;
+        if (d) {
+          const full = d.img || base;
+          const dt = new Date(d.fetchedAt || Date.now());
+          updatedEl.textContent = 'Aktualizovane ' + dt.toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
+          openFull.href = full;
+          img.dataset.full = full;
+        }
       })
-      .catch(() => { img.dataset.full = base; });
+      .catch(() => {});
 
     // ===== LIGHTBOX =====
     const lb = document.getElementById('lb');
@@ -550,8 +552,9 @@
     function fitToViewport() {
       S.vw = viewport.clientWidth;
       S.vh = viewport.clientHeight;
-      S.iw = lbImg.naturalWidth || lbImg.width;
-      S.ih = lbImg.naturalHeight || lbImg.height;
+      S.iw = lbImg.naturalWidth;
+      S.ih = lbImg.naturalHeight;
+      if (!S.iw || !S.ih) return; // image not ready yet
       const scx = S.vw / S.iw, scy = S.vh / S.ih;
       S.min = Math.min(scx, scy);
       S.scale = S.min;
@@ -565,14 +568,20 @@
     }
 
     function openLB() {
-      lbImg.src = img.dataset.full || img.src;
+      const src = img.dataset.full || img.src;
       lb.classList.add('open');
-      if (lbImg.complete) fitToViewport();
-      else lbImg.onload = fitToViewport;
+      // Always use onload to ensure dimensions are available
+      lbImg.onload = function() {
+        fitToViewport();
+      };
+      // Reset src to force onload even if cached
+      lbImg.src = '';
+      lbImg.src = src;
     }
 
     function closeLB() {
       lb.classList.remove('open');
+      lbImg.onload = null;
       lbImg.src = '';
     }
 
