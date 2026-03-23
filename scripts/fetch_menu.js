@@ -5,7 +5,8 @@ const path = require('path');
 
 const MENU_PAGE_URL = 'https://ucm.top-relax.sk/';
 const OUTPUT_DIR = path.join(__dirname, '..', 'assets');
-const OUTPUT_FILE = path.join(OUTPUT_DIR, 'menu.jpg');
+const OUTPUT_JPG = path.join(OUTPUT_DIR, 'menu.jpg');
+const OUTPUT_PNG = path.join(OUTPUT_DIR, 'menu.png');
 
 function httpGet(url) {
   return new Promise((resolve, reject) => {
@@ -82,8 +83,9 @@ async function main() {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  fs.writeFileSync(OUTPUT_FILE, imageData);
-  console.log('Saved to', OUTPUT_FILE);
+  fs.writeFileSync(OUTPUT_JPG, imageData);
+  fs.writeFileSync(OUTPUT_PNG, imageData);
+  console.log('Saved to', OUTPUT_JPG, 'and', OUTPUT_PNG);
 }
 
 main().catch((err) => {
