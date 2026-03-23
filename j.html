@@ -128,249 +128,97 @@
       flex-shrink: 0;
     }
 
-    .countdown-icon svg {
-      width: 18px;
-      height: 18px;
-      color: var(--text-2);
-    }
+    .countdown-icon svg { width: 18px; height: 18px; color: var(--text-2); }
 
-    .countdown-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-    }
-
-    .countdown-label {
-      font-size: 13px;
-      color: var(--text-2);
-      font-weight: 500;
-    }
-
-    .countdown-time {
-      font-family: var(--mono);
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--text);
-    }
+    .countdown-info { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+    .countdown-label { font-size: 13px; color: var(--text-2); font-weight: 500; }
+    .countdown-time { font-family: var(--mono); font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
 
     .countdown-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 500;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text-2);
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+      border-radius: 999px; font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2);
     }
-
-    .countdown-badge .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border-light);
-    }
-
-    .countdown-badge.active {
-      border-color: rgba(34, 197, 94, .3);
-      background: var(--green-dim);
-      color: var(--green);
-    }
-
-    .countdown-badge.active .dot {
-      background: var(--green);
-      box-shadow: 0 0 6px rgba(34, 197, 94, .4);
-    }
-
-    .countdown-badge.over {
-      border-color: rgba(225, 29, 46, .25);
-      background: var(--accent-dim);
-      color: var(--accent);
-    }
-
-    .countdown-badge.over .dot {
-      background: var(--accent);
-    }
+    .countdown-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-light); }
+    .countdown-badge.active { border-color: rgba(34,197,94,.3); background: var(--green-dim); color: var(--green); }
+    .countdown-badge.active .dot { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,.4); }
+    .countdown-badge.over { border-color: rgba(225,29,46,.25); background: var(--accent-dim); color: var(--accent); }
+    .countdown-badge.over .dot { background: var(--accent); }
 
     .section-heading {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-2);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      font-size: 13px; font-weight: 500; color: var(--text-2);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-
-    .updated-text {
-      font-size: 12px;
-      color: var(--text-2);
-      font-weight: 300;
-      letter-spacing: 0;
-      text-transform: none;
-    }
+    .updated-text { font-size: 12px; color: var(--text-2); font-weight: 300; letter-spacing: 0; text-transform: none; }
 
     .menu-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      position: relative;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; position: relative;
     }
 
-    .menu-figure {
-      position: relative;
-      overflow: hidden;
-      cursor: zoom-in;
-    }
-
-    .menu-figure img {
-      width: 100%;
-      height: auto;
-      display: block;
-      image-rendering: auto;
-    }
+    .menu-figure { position: relative; overflow: hidden; cursor: zoom-in; }
+    .menu-figure img { width: 100%; height: auto; display: block; }
 
     .menu-figure::after {
-      content: "";
-      position: absolute;
-      inset: 0;
+      content: ""; position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.06), rgba(255,255,255,0));
-      transform: translateX(-100%);
-      animation: shimmer 1.2s infinite;
-      pointer-events: none;
+      transform: translateX(-100%); animation: shimmer 1.2s infinite; pointer-events: none;
     }
-
     .menu-figure.loaded::after { display: none; }
-
     @keyframes shimmer { to { transform: translateX(100%); } }
 
-    .menu-actions {
-      display: flex;
-      justify-content: flex-end;
-      padding: 14px 16px;
-      border-top: 1px solid var(--border);
-    }
-
+    .menu-actions { display: flex; justify-content: flex-end; padding: 14px 16px; border-top: 1px solid var(--border); }
     .btn-open {
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-weight: 500;
-      font-size: 14px;
-      color: var(--text-2);
-      text-decoration: none;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      transition: border-color .15s, color .15s;
+      padding: 8px 16px; border-radius: 10px; font-weight: 500; font-size: 14px;
+      color: var(--text-2); text-decoration: none; border: 1px solid var(--border);
+      background: var(--surface-2); transition: border-color .15s, color .15s;
     }
+    .btn-open:hover { border-color: var(--accent); color: var(--text); }
 
-    .btn-open:hover {
-      border-color: var(--accent);
-      color: var(--text);
-    }
+    .menu-error { padding: 48px 20px; text-align: center; color: var(--text-2); font-weight: 300; display: none; }
 
-    .menu-error {
-      padding: 48px 20px;
-      text-align: center;
-      color: var(--text-2);
-      font-weight: 300;
-      display: none;
-    }
-
-    /* ========== LIGHTBOX ========== */
+    /* ===== LIGHTBOX ===== */
     .lightbox {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.85); backdrop-filter: blur(8px);
       display: none;
-      z-index: 100;
-      background: rgba(0, 0, 0, .85);
-      backdrop-filter: blur(8px);
     }
-
     .lightbox.open { display: block; }
 
     .lb-viewport {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
+      position: absolute; inset: 0; overflow: hidden;
     }
 
     .lb-img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: block;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
-      will-change: transform;
-      transform-origin: 0 0;
-      cursor: grab;
-      user-select: none;
-      -webkit-user-drag: none;
-      touch-action: none;
+      position: absolute; top: 0; left: 0;
+      border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      will-change: transform; transform-origin: 0 0;
+      cursor: grab; user-select: none; touch-action: none;
     }
-
     .lb-img.grabbing { cursor: grabbing; }
 
     .lb-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 110;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(14, 14, 17, .85);
-      color: var(--text-2);
-      font-size: 20px;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      transition: color .15s, border-color .15s;
+      position: absolute; top: 16px; right: 16px; z-index: 110;
+      width: 40px; height: 40px; border-radius: 10px;
+      border: 1px solid var(--border); background: rgba(14,14,17,.85);
+      color: var(--text-2); font-size: 20px; cursor: pointer;
+      display: grid; place-items: center; transition: color .15s, border-color .15s;
     }
-
-    .lb-close:hover {
-      color: var(--text);
-      border-color: var(--border-light);
-    }
+    .lb-close:hover { color: var(--text); border-color: var(--border-light); }
 
     .lb-hint {
-      position: absolute;
-      left: 50%;
-      bottom: 16px;
-      transform: translateX(-50%);
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-2);
-      background: rgba(14, 14, 17, .85);
-      border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: 999px;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 110;
+      position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+      font-size: 12px; font-weight: 500; color: var(--text-2);
+      background: rgba(14,14,17,.85); border: 1px solid var(--border);
+      padding: 8px 14px; border-radius: 999px; pointer-events: none; white-space: nowrap; z-index: 110;
     }
 
     footer {
-      text-align: center;
-      padding: 24px 20px 32px;
-      border-top: 1px solid var(--border);
-      color: var(--text-2);
-      font-size: 13px;
-      font-weight: 300;
+      text-align: center; padding: 24px 20px 32px;
+      border-top: 1px solid var(--border); color: var(--text-2); font-size: 13px; font-weight: 300;
     }
-
-    footer .accent {
-      color: var(--accent);
-      font-weight: 700;
-    }
+    footer .accent { color: var(--accent); font-weight: 700; }
 
     @media (max-width: 500px) {
       header { padding: 16px; }
@@ -428,7 +276,7 @@
         </div>
         <div class="menu-error" id="menuError">Nepodarilo sa nacitat jedalny listok.</div>
         <div class="menu-actions">
-          <a class="btn-open" id="openFull" href="assets/menu.jpg" target="_blank" rel="noopener">Otvorit original</a>
+          <a class="btn-open" href="assets/menu.jpg" target="_blank" rel="noopener">Otvorit original</a>
         </div>
       </div>
 
@@ -459,7 +307,6 @@
     const fmtTime = new Intl.DateTimeFormat('sk-SK', {
       timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     });
-
     const cdTime = document.getElementById('cdTime');
     const cdLabel = document.getElementById('cdLabel');
     const cdBadge = document.getElementById('cdBadge');
@@ -469,7 +316,6 @@
       const p = fmtTime.formatToParts(new Date());
       return { h: +p.find(x => x.type === 'hour').value, m: +p.find(x => x.type === 'minute').value, s: +p.find(x => x.type === 'second').value };
     }
-
     function pad(n) { return String(n).padStart(2, '0'); }
 
     function tickCountdown() {
@@ -477,15 +323,14 @@
       const now = h * 3600 + m * 60 + s;
       const lunch = LUNCH_H * 3600 + LUNCH_M * 60;
       const diff = lunch - now;
-
       if (diff > 0) {
-        cdTime.textContent = `${pad(Math.floor(diff / 3600))}:${pad(Math.floor((diff % 3600) / 60))}:${pad(diff % 60)}`;
+        cdTime.textContent = pad(Math.floor(diff / 3600)) + ':' + pad(Math.floor((diff % 3600) / 60)) + ':' + pad(diff % 60);
         cdLabel.textContent = 'Do obeda (12:45)';
         cdBadge.className = 'countdown-badge';
         cdStatus.textContent = 'Caka sa';
       } else if (diff >= -1800) {
         const left = 1800 + diff;
-        cdTime.textContent = `00:${pad(Math.floor(left / 60))}:${pad(left % 60)}`;
+        cdTime.textContent = '00:' + pad(Math.floor(left / 60)) + ':' + pad(left % 60);
         cdLabel.textContent = 'Obedova prestavka';
         cdBadge.className = 'countdown-badge active';
         cdStatus.textContent = 'Prave teraz';
@@ -496,40 +341,30 @@
         cdStatus.textContent = 'Po obede';
       }
     }
-
     tickCountdown();
     setInterval(tickCountdown, 1000);
 
     // ===== MENU IMAGE =====
-    const base = 'assets/menu.jpg';
+    const BASE = 'assets/menu.jpg';
     const img = document.getElementById('menuImg');
     const fig = document.getElementById('menuFigure');
     const updatedEl = document.getElementById('menuUpdated');
-    const openFull = document.getElementById('openFull');
     const menuError = document.getElementById('menuError');
 
-    img.src = base;
-    img.dataset.full = base;
+    img.src = BASE;
 
     function markLoaded() { fig.classList.add('loaded'); }
     if (img.complete && img.naturalWidth) markLoaded();
     else img.addEventListener('load', markLoaded);
+    img.addEventListener('error', () => { markLoaded(); fig.style.display = 'none'; menuError.style.display = 'block'; });
 
-    img.addEventListener('error', () => {
-      markLoaded();
-      fig.style.display = 'none';
-      menuError.style.display = 'block';
-    });
-
-    fetch(base + '.json', { cache: 'no-store' })
+    // Load metadata (generated by fetch_menu.js)
+    fetch(BASE + '.json', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        if (!d) return;
-        const full = d.img || base;
-        const dt = new Date(d.fetchedAt || Date.now());
-        updatedEl.textContent = 'Aktualizovane ' + dt.toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
-        openFull.href = full;
-        img.dataset.full = full;
+        if (d && d.fetchedAt) {
+          updatedEl.textContent = 'Aktualizovane ' + new Date(d.fetchedAt).toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
+        }
       })
       .catch(() => {});
 
@@ -541,22 +376,18 @@
 
     let scale = 1, minScale = 1, tx = 0, ty = 0, iw = 0, ih = 0;
     let dragging = false, startX = 0, startY = 0, origTx = 0, origTy = 0;
-    const MAX_SCALE = 8;
-    const ZOOM_STEP = 1.15;
-
-    function getViewSize() {
-      return { vw: viewport.clientWidth, vh: viewport.clientHeight };
-    }
+    let lbJustOpened = false;
+    const MAX_SCALE = 8, ZOOM_STEP = 1.15;
 
     function applyTransform() {
-      lbImg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      lbImg.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
     }
 
     function fitImage() {
       iw = lbImg.naturalWidth;
       ih = lbImg.naturalHeight;
       if (!iw || !ih) return;
-      const { vw, vh } = getViewSize();
+      const vw = viewport.clientWidth, vh = viewport.clientHeight;
       minScale = Math.min(vw / iw, vh / ih, 1);
       scale = minScale;
       tx = (vw - iw * scale) / 2;
@@ -564,56 +395,65 @@
       applyTransform();
     }
 
-    function clamp() {
-      const { vw, vh } = getViewSize();
+    function clampPan() {
+      const vw = viewport.clientWidth, vh = viewport.clientHeight;
       const w = iw * scale, h = ih * scale;
-      if (w <= vw) { tx = (vw - w) / 2; }
-      else { tx = Math.min(0, Math.max(vw - w, tx)); }
-      if (h <= vh) { ty = (vh - h) / 2; }
-      else { ty = Math.min(0, Math.max(vh - h, ty)); }
+      if (w <= vw) tx = (vw - w) / 2; else tx = Math.min(0, Math.max(vw - w, tx));
+      if (h <= vh) ty = (vh - h) / 2; else ty = Math.min(0, Math.max(vh - h, ty));
     }
 
     function zoomAt(cx, cy, factor) {
-      const newScale = Math.min(MAX_SCALE, Math.max(minScale, scale * factor));
-      if (newScale === scale) return;
-      // zoom toward cursor
-      const imgX = (cx - tx) / scale;
-      const imgY = (cy - ty) / scale;
-      scale = newScale;
+      const ns = Math.min(MAX_SCALE, Math.max(minScale, scale * factor));
+      if (ns === scale) return;
+      const imgX = (cx - tx) / scale, imgY = (cy - ty) / scale;
+      scale = ns;
       tx = cx - imgX * scale;
       ty = cy - imgY * scale;
-      clamp();
+      clampPan();
       applyTransform();
     }
 
-    function openLB() {
-      const src = img.dataset.full || base;
+    function openLB(e) {
+      e.stopPropagation();
       lb.classList.add('open');
       document.body.style.overflow = 'hidden';
+      lbJustOpened = true;
+      setTimeout(function() { lbJustOpened = false; }, 300);
 
-      lbImg.onload = function () {
-        fitImage();
-        lbImg.onload = null;
-      };
-      lbImg.onerror = function () {
-        console.error('Lightbox image failed to load');
-        closeLB();
-      };
-      // force reload
-      lbImg.removeAttribute('src');
-      setTimeout(() => { lbImg.src = src; }, 0);
+      lbImg.onload = function() { fitImage(); };
+      lbImg.src = BASE;
     }
 
     function closeLB() {
+      if (lbJustOpened) return;
       lb.classList.remove('open');
       document.body.style.overflow = '';
       lbImg.onload = null;
-      lbImg.onerror = null;
-      lbImg.removeAttribute('src');
+      lbImg.src = '';
     }
 
-    // mouse drag
-    lbImg.addEventListener('pointerdown', (e) => {
+    fig.addEventListener('click', openLB);
+    lbClose.addEventListener('click', function(e) { e.stopPropagation(); lbJustOpened = false; closeLB(); });
+
+    // Click on dark backdrop = close (but NOT on the image itself)
+    lb.addEventListener('click', function(e) {
+      if (e.target === lbImg) return;
+      closeLB();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && lb.classList.contains('open')) closeLB();
+    });
+
+    // Wheel zoom
+    viewport.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var r = viewport.getBoundingClientRect();
+      zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
+    }, { passive: false });
+
+    // Drag to pan
+    lbImg.addEventListener('pointerdown', function(e) {
       if (scale <= minScale) return;
       e.preventDefault();
       dragging = true;
@@ -623,45 +463,23 @@
       lbImg.setPointerCapture(e.pointerId);
     });
 
-    lbImg.addEventListener('pointermove', (e) => {
+    lbImg.addEventListener('pointermove', function(e) {
       if (!dragging) return;
       e.preventDefault();
       tx = origTx + (e.clientX - startX);
       ty = origTy + (e.clientY - startY);
-      clamp();
+      clampPan();
       applyTransform();
     });
 
-    lbImg.addEventListener('pointerup', () => {
+    lbImg.addEventListener('pointerup', function() {
       dragging = false;
       lbImg.classList.remove('grabbing');
     });
 
-    lbImg.addEventListener('dragstart', e => e.preventDefault());
+    lbImg.addEventListener('dragstart', function(e) { e.preventDefault(); });
 
-    // wheel zoom
-    viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const r = viewport.getBoundingClientRect();
-      zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
-    }, { passive: false });
-
-    // open / close
-    fig.addEventListener('click', openLB);
-    lbClose.addEventListener('click', closeLB);
-
-    // click on backdrop closes
-    lb.addEventListener('click', (e) => {
-      if (e.target === lb || e.target === viewport) closeLB();
-    });
-
-    // Esc closes
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && lb.classList.contains('open')) closeLB();
-    });
-
-    // resize
-    window.addEventListener('resize', () => {
+    window.addEventListener('resize', function() {
       if (lb.classList.contains('open')) fitImage();
     });
   })();
