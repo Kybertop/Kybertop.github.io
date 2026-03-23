@@ -85,6 +85,10 @@ async function main() {
 
   fs.writeFileSync(OUTPUT_JPG, imageData);
   fs.writeFileSync(OUTPUT_PNG, imageData);
+
+  // Save metadata so the frontend knows when it was last updated
+  const meta = { fetchedAt: new Date().toISOString(), sourceUrl: imageUrl };
+  fs.writeFileSync(path.join(OUTPUT_DIR, 'menu.jpg.json'), JSON.stringify(meta));
   console.log('Saved to', OUTPUT_JPG, 'and', OUTPUT_PNG);
 }
 
