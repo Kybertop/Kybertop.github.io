@@ -41,7 +41,6 @@
       flex-direction: column;
     }
 
-    /* ========== HEADER ========== */
     header {
       padding: 20px 24px;
       display: flex;
@@ -86,7 +85,6 @@
       background: var(--surface-2);
     }
 
-    /* ========== MAIN ========== */
     main {
       flex: 1;
       max-width: 800px;
@@ -105,7 +103,6 @@
       animation: fadeUp .3s ease;
     }
 
-    /* ========== COUNTDOWN ========== */
     .countdown-bar {
       display: flex;
       align-items: center;
@@ -199,7 +196,6 @@
       background: var(--accent);
     }
 
-    /* ========== MENU IMAGE ========== */
     .section-heading {
       font-size: 13px;
       font-weight: 500;
@@ -241,7 +237,6 @@
       image-rendering: auto;
     }
 
-    /* shimmer loader */
     .menu-figure::after {
       content: "";
       position: absolute;
@@ -293,27 +288,24 @@
       position: fixed;
       inset: 0;
       display: none;
-      place-items: center;
       z-index: 100;
-      background: rgba(0, 0, 0, .8);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, .85);
+      backdrop-filter: blur(8px);
     }
 
-    .lightbox.open { display: grid; }
+    .lightbox.open { display: block; }
 
     .lb-viewport {
-      position: relative;
-      width: min(95vw, 1200px);
-      max-height: 92vh;
+      position: absolute;
+      inset: 0;
       overflow: hidden;
-      display: grid;
-      place-items: center;
     }
 
     .lb-img {
+      position: absolute;
+      top: 0;
+      left: 0;
       display: block;
-      max-width: none;
-      max-height: none;
       border-radius: 12px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
       will-change: transform;
@@ -322,20 +314,37 @@
       user-select: none;
       -webkit-user-drag: none;
       touch-action: none;
-      animation: lbIn .15s ease-out;
     }
 
     .lb-img.grabbing { cursor: grabbing; }
 
-    @keyframes lbIn {
-      from { transform: scale(.96); opacity: .6; }
-      to { transform: scale(1); opacity: 1; }
+    .lb-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 110;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(14, 14, 17, .85);
+      color: var(--text-2);
+      font-size: 20px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: color .15s, border-color .15s;
+    }
+
+    .lb-close:hover {
+      color: var(--text);
+      border-color: var(--border-light);
     }
 
     .lb-hint {
       position: absolute;
       left: 50%;
-      bottom: 12px;
+      bottom: 16px;
       transform: translateX(-50%);
       font-size: 12px;
       font-weight: 500;
@@ -346,9 +355,9 @@
       border-radius: 999px;
       pointer-events: none;
       white-space: nowrap;
+      z-index: 110;
     }
 
-    /* ========== FOOTER ========== */
     footer {
       text-align: center;
       padding: 24px 20px 32px;
@@ -388,7 +397,6 @@
   <main>
     <div class="content">
 
-      <!-- COUNTDOWN -->
       <div class="countdown-bar" id="countdown">
         <div class="countdown-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -409,7 +417,6 @@
         </span>
       </div>
 
-      <!-- MENU IMAGE -->
       <div class="section-heading">
         <span>Jedalny listok</span>
         <time class="updated-text" id="menuUpdated"></time>
@@ -428,28 +435,27 @@
     </div>
   </main>
 
-  <!-- LIGHTBOX -->
   <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Zvacseny jedalny listok">
     <div class="lb-viewport" id="lbViewport">
       <img class="lb-img" id="lbImg" alt="" draggable="false">
-      <div class="lb-hint">Kolieskom priblizenie · Tahanim posun · Kliknutim mimo zatvoris</div>
     </div>
+    <button class="lb-close" id="lbClose" aria-label="Zatvorit">&times;</button>
+    <div class="lb-hint">Kolieskom priblizenie · Tahanim posun · Esc zatvoris</div>
   </div>
 
   <footer>
     <span class="accent">&#9889;</span> Energo &middot; &copy; <span id="year"></span>
   </footer>
 
-<script>
+  <script>
   (() => {
     'use strict';
 
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ===== COUNTDOWN TO 12:45 =====
+    // ===== COUNTDOWN =====
     const TZ = 'Europe/Bratislava';
     const LUNCH_H = 12, LUNCH_M = 45;
-
     const fmtTime = new Intl.DateTimeFormat('sk-SK', {
       timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     });
@@ -460,33 +466,26 @@
     const cdStatus = document.getElementById('cdStatus');
 
     function getNowParts() {
-      const parts = fmtTime.formatToParts(new Date());
-      return {
-        h: +parts.find(p => p.type === 'hour').value,
-        m: +parts.find(p => p.type === 'minute').value,
-        s: +parts.find(p => p.type === 'second').value
-      };
+      const p = fmtTime.formatToParts(new Date());
+      return { h: +p.find(x => x.type === 'hour').value, m: +p.find(x => x.type === 'minute').value, s: +p.find(x => x.type === 'second').value };
     }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
 
     function tickCountdown() {
       const { h, m, s } = getNowParts();
-      const nowSec = h * 3600 + m * 60 + s;
-      const lunchSec = LUNCH_H * 3600 + LUNCH_M * 60;
-      const diff = lunchSec - nowSec;
+      const now = h * 3600 + m * 60 + s;
+      const lunch = LUNCH_H * 3600 + LUNCH_M * 60;
+      const diff = lunch - now;
 
       if (diff > 0) {
-        const dh = Math.floor(diff / 3600);
-        const dm = Math.floor((diff % 3600) / 60);
-        const ds = diff % 60;
-        cdTime.textContent = `${String(dh).padStart(2,'0')}:${String(dm).padStart(2,'0')}:${String(ds).padStart(2,'0')}`;
+        cdTime.textContent = `${pad(Math.floor(diff / 3600))}:${pad(Math.floor((diff % 3600) / 60))}:${pad(diff % 60)}`;
         cdLabel.textContent = 'Do obeda (12:45)';
         cdBadge.className = 'countdown-badge';
         cdStatus.textContent = 'Caka sa';
       } else if (diff >= -1800) {
         const left = 1800 + diff;
-        const lm = Math.floor(left / 60);
-        const ls = left % 60;
-        cdTime.textContent = `00:${String(lm).padStart(2,'0')}:${String(ls).padStart(2,'0')}`;
+        cdTime.textContent = `00:${pad(Math.floor(left / 60))}:${pad(left % 60)}`;
         cdLabel.textContent = 'Obedova prestavka';
         cdBadge.className = 'countdown-badge active';
         cdStatus.textContent = 'Prave teraz';
@@ -503,15 +502,14 @@
 
     // ===== MENU IMAGE =====
     const base = 'assets/menu.jpg';
-
     const img = document.getElementById('menuImg');
     const fig = document.getElementById('menuFigure');
     const updatedEl = document.getElementById('menuUpdated');
     const openFull = document.getElementById('openFull');
     const menuError = document.getElementById('menuError');
 
-    // cache-bust so we always get the latest image
-    img.src = base + '?t=' + Date.now();
+    img.src = base;
+    img.dataset.full = base;
 
     function markLoaded() { fig.classList.add('loaded'); }
     if (img.complete && img.naturalWidth) markLoaded();
@@ -523,19 +521,15 @@
       menuError.style.display = 'block';
     });
 
-    // set dataset.full immediately as fallback
-    img.dataset.full = base;
-
     fetch(base + '.json', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        if (d) {
-          const full = d.img || base;
-          const dt = new Date(d.fetchedAt || Date.now());
-          updatedEl.textContent = 'Aktualizovane ' + dt.toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
-          openFull.href = full;
-          img.dataset.full = full;
-        }
+        if (!d) return;
+        const full = d.img || base;
+        const dt = new Date(d.fetchedAt || Date.now());
+        updatedEl.textContent = 'Aktualizovane ' + dt.toLocaleString('sk-SK', { dateStyle: 'medium', timeStyle: 'short' });
+        openFull.href = full;
+        img.dataset.full = full;
       })
       .catch(() => {});
 
@@ -543,108 +537,133 @@
     const lb = document.getElementById('lb');
     const lbImg = document.getElementById('lbImg');
     const viewport = document.getElementById('lbViewport');
+    const lbClose = document.getElementById('lbClose');
 
-    const S = { scale: 1, min: 1, max: 8, tx: 0, ty: 0, vw: 0, vh: 0, iw: 0, ih: 0 };
-    let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    let scale = 1, minScale = 1, tx = 0, ty = 0, iw = 0, ih = 0;
+    let dragging = false, startX = 0, startY = 0, origTx = 0, origTy = 0;
+    const MAX_SCALE = 8;
+    const ZOOM_STEP = 1.15;
 
-    lbImg.addEventListener('dragstart', e => e.preventDefault());
-
-    function fitToViewport() {
-      S.vw = viewport.clientWidth;
-      S.vh = viewport.clientHeight;
-      S.iw = lbImg.naturalWidth;
-      S.ih = lbImg.naturalHeight;
-      if (!S.iw || !S.ih) return; // image not ready yet
-      const scx = S.vw / S.iw, scy = S.vh / S.ih;
-      S.min = Math.min(scx, scy);
-      S.scale = S.min;
-      S.tx = (S.vw - S.iw * S.scale) * 0.5;
-      S.ty = (S.vh - S.ih * S.scale) * 0.5;
-      applyTransform();
+    function getViewSize() {
+      return { vw: viewport.clientWidth, vh: viewport.clientHeight };
     }
 
     function applyTransform() {
-      lbImg.style.transform = `translate(${S.tx}px, ${S.ty}px) scale(${S.scale})`;
+      lbImg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+    }
+
+    function fitImage() {
+      iw = lbImg.naturalWidth;
+      ih = lbImg.naturalHeight;
+      if (!iw || !ih) return;
+      const { vw, vh } = getViewSize();
+      minScale = Math.min(vw / iw, vh / ih, 1);
+      scale = minScale;
+      tx = (vw - iw * scale) / 2;
+      ty = (vh - ih * scale) / 2;
+      applyTransform();
+    }
+
+    function clamp() {
+      const { vw, vh } = getViewSize();
+      const w = iw * scale, h = ih * scale;
+      if (w <= vw) { tx = (vw - w) / 2; }
+      else { tx = Math.min(0, Math.max(vw - w, tx)); }
+      if (h <= vh) { ty = (vh - h) / 2; }
+      else { ty = Math.min(0, Math.max(vh - h, ty)); }
+    }
+
+    function zoomAt(cx, cy, factor) {
+      const newScale = Math.min(MAX_SCALE, Math.max(minScale, scale * factor));
+      if (newScale === scale) return;
+      // zoom toward cursor
+      const imgX = (cx - tx) / scale;
+      const imgY = (cy - ty) / scale;
+      scale = newScale;
+      tx = cx - imgX * scale;
+      ty = cy - imgY * scale;
+      clamp();
+      applyTransform();
     }
 
     function openLB() {
-      const src = img.dataset.full || img.src;
+      const src = img.dataset.full || base;
       lb.classList.add('open');
-      // Always use onload to ensure dimensions are available
-      lbImg.onload = function() {
-        fitToViewport();
+      document.body.style.overflow = 'hidden';
+
+      lbImg.onload = function () {
+        fitImage();
+        lbImg.onload = null;
       };
-      // Reset src to force onload even if cached
-      lbImg.src = '';
-      lbImg.src = src;
+      lbImg.onerror = function () {
+        console.error('Lightbox image failed to load');
+        closeLB();
+      };
+      // force reload
+      lbImg.removeAttribute('src');
+      setTimeout(() => { lbImg.src = src; }, 0);
     }
 
     function closeLB() {
       lb.classList.remove('open');
+      document.body.style.overflow = '';
       lbImg.onload = null;
-      lbImg.src = '';
+      lbImg.onerror = null;
+      lbImg.removeAttribute('src');
     }
 
-    const STEP = 1.15;
-    function zoomAt(x, y, factor) {
-      const ns = Math.min(S.max, Math.max(S.min, S.scale * factor));
-      if (ns === S.scale) return;
-      const imgX = (x - S.tx) / S.scale;
-      const imgY = (y - S.ty) / S.scale;
-      S.tx = x - imgX * ns;
-      S.ty = y - imgY * ns;
-      if (ns <= S.min) { fitToViewport(); return; }
-      S.scale = ns;
-      clampTranslate();
-      applyTransform();
-    }
-
-    function clampTranslate() {
-      const w = S.iw * S.scale, h = S.ih * S.scale;
-      const minX = Math.min(0, S.vw - w), maxX = Math.max(0, S.vw - w);
-      const minY = Math.min(0, S.vh - h), maxY = Math.max(0, S.vh - h);
-      S.tx = Math.min(maxX, Math.max(minX, S.tx));
-      S.ty = Math.min(maxY, Math.max(minY, S.ty));
-    }
-
-    function onDown(e) {
-      if (S.scale <= S.min) return;
+    // mouse drag
+    lbImg.addEventListener('pointerdown', (e) => {
+      if (scale <= minScale) return;
       e.preventDefault();
       dragging = true;
       lbImg.classList.add('grabbing');
-      sx = e.clientX; sy = e.clientY; ox = S.tx; oy = S.ty;
-      window.addEventListener('pointermove', onMove, { passive: false });
-      window.addEventListener('pointerup', onUp, { once: true });
-    }
-
-    function onMove(e) {
-      if (!dragging) return;
-      e.preventDefault();
-      S.tx = ox + (e.clientX - sx);
-      S.ty = oy + (e.clientY - sy);
-      clampTranslate();
-      applyTransform();
-    }
-
-    function onUp() {
-      dragging = false;
-      lbImg.classList.remove('grabbing');
-      window.removeEventListener('pointermove', onMove);
-    }
-
-    fig.addEventListener('click', openLB);
-    lb.addEventListener('click', e => {
-      if (e.target === lb || e.target === viewport || e.target.classList.contains('lb-hint')) closeLB();
+      startX = e.clientX; startY = e.clientY;
+      origTx = tx; origTy = ty;
+      lbImg.setPointerCapture(e.pointerId);
     });
 
-    viewport.addEventListener('wheel', e => {
+    lbImg.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      tx = origTx + (e.clientX - startX);
+      ty = origTy + (e.clientY - startY);
+      clamp();
+      applyTransform();
+    });
+
+    lbImg.addEventListener('pointerup', () => {
+      dragging = false;
+      lbImg.classList.remove('grabbing');
+    });
+
+    lbImg.addEventListener('dragstart', e => e.preventDefault());
+
+    // wheel zoom
+    viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
       const r = viewport.getBoundingClientRect();
-      zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY > 0 ? 1 / STEP : STEP);
+      zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP);
     }, { passive: false });
 
-    lbImg.addEventListener('pointerdown', onDown);
-    window.addEventListener('resize', () => { if (lb.classList.contains('open')) fitToViewport(); });
+    // open / close
+    fig.addEventListener('click', openLB);
+    lbClose.addEventListener('click', closeLB);
+
+    // click on backdrop closes
+    lb.addEventListener('click', (e) => {
+      if (e.target === lb || e.target === viewport) closeLB();
+    });
+
+    // Esc closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lb.classList.contains('open')) closeLB();
+    });
+
+    // resize
+    window.addEventListener('resize', () => {
+      if (lb.classList.contains('open')) fitImage();
+    });
   })();
   </script>
 </body>
