@@ -1,1 +1,137 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PATO / 3D PRINT</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><rect x='6' y='6' width='20' height='20' fill='%23d8ff00'/><rect x='11' y='11' width='10' height='10' fill='%23000'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">PATO3DFrajer</a>
+    <span class="header-tag">3D / Piešťany, SK</span>
+    <nav class="header-contact">
+      <a href="mailto:pato@hesko.cc">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2.5" width="10" height="7" rx="0" stroke="currentColor" stroke-width="1.2"/><path d="M1 3.5L6 7L11 3.5" stroke="currentColor" stroke-width="1.2"/></svg>
+        pato@hesko.cc
+      </a>
+      <a href="https://instagram.com/kybertop" target="_blank">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="6" r="2.5" stroke="currentColor" stroke-width="1.2"/><circle cx="9" cy="3" r="0.8" fill="currentColor"/></svg>
+        @kybertop
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div>
+      <h1 class="hero-title">3D<br><span>PRINT</span><br>MODELY</h1>
+      <p class="hero-subtitle">Custom modely / Na objednávku</p>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-stats">
+      <div class="stat-box">
+        <div class="stat-num">PLA</div>
+        <div class="stat-label">Materiál</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">0.4</div>
+        <div class="stat-label">Vrstva mm</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">FDM</div>
+        <div class="stat-label">Technológia</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="model-count">0</div>
+        <div class="stat-label">Modelov</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker-content"></div>
+</div>
+
+<!-- CATALOG -->
+<section>
+  <div class="section-header">
+    <h2 class="section-title">KATALOG</h2>
+    <span class="section-count" id="visible-count">0</span>
+    <div class="section-line"></div>
+  </div>
+
+<div class="catalog-grid" id="catalog-grid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- CONTACT STRIP -->
+<section class="contact-strip">
+  <div class="contact-block">
+    <p class="contact-type">Email</p>
+    <a class="contact-val" href="mailto:pato@hesko.cc">pato@hesko.cc</a>
+    <p style="font-size:11px;color:var(--gray-light);margin-top:4px;">Napíš čo chceš, rozmery, farbu</p>
+  </div>
+  <div class="contact-block">
+    <p class="contact-type">Instagram</p>
+    <a class="contact-val" href="https://instagram.com/kybertop" target="_blank">@kybertop</a>
+    <p style="font-size:11px;color:var(--gray-light);margin-top:4px;">DM, ukážky, WIP fotky</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-left">Pato &mdash; 3D Print Studio &mdash; Piešťany</span>
+  <span class="footer-right">FDM / PLA / 0.2mm</span>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal" role="dialog">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">MODEL</span>
+      <button class="modal-close" id="modal-close">&#x2715;</button>
+    </div>
+    <div class="modal-preview" id="modal-preview">
+      <div class="modal-preview-grid"></div>
+      <div id="modal-preview-inner" style="position:absolute;inset:0;z-index:1;"></div>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="modal-specs" id="modal-specs"></div>
+      <div class="modal-colors-section">
+        <p class="modal-colors-label">Dostupne farby</p>
+        <div class="modal-colors-grid" id="modal-colors"></div>
+      </div>
+      <div class="modal-cta">
+        <a href="mailto:pato@hesko.cc" class="btn-primary" id="modal-email-btn">
+          Objednat
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M8 3L12 7L8 11" stroke="currentColor" stroke-width="1.5"/></svg>
+        </a>
+        <a href="https://instagram.com/kybertop" class="btn-secondary" target="_blank">
+          Instagram
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="7" r="2.8" stroke="currentColor" stroke-width="1.4"/><circle cx="10.2" cy="3.8" r="0.9" fill="currentColor"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="models.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
